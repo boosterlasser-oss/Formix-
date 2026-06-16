@@ -1,0 +1,59 @@
+Aber komplett tägig ==================================================
+FANTASY NUTRITION & FITNESS - VOLLSTÄNDIGES HANDBUCH
+==================================================
+
+Dieses Dokument beschreibt alle Module und die Funktionsweise der gesamten App.
+
+1. RUNE.AI & ONBOARDING (DEIN START)
+------------------------------------
+- Profile-Setup: Erfassung von Alter, Gewicht, Ziel (Muskeln, Abnehmen, Fitness) und Erfahrung.
+- KI-Berechnung: Automatische Ermittlung deines TDEE (Kalorienverbrauch) und deiner Makronährstoffe (Eiweiß, Kohlenhydrate, Fett).
+- Dynamische Anpassung: Ändert sich dein Gewicht, passt RUNE.AI deine Ziele automatisch an.
+
+2. ERNÄHRUNGS-SYSTEM (DIE KÜCHE)
+--------------------------------
+- Rezepte & Produkte: Zugriff auf eine Datenbank mit vordefinierten Fantasy-Rezepten und Lebensmitteln.
+- Tagesplaner: Du kannst Mahlzeiten für den Tag planen. Die App zeigt dir sofort an, wie viele Kalorien du noch übrig hast.
+- Tracker: Protokollierung von allem, was du isst, mit direkter Auswirkung auf deine Tages-Bilanz.
+
+3. TRAININGSSYSTEM (DIE QUESTS)
+-------------------------------
+Es gibt drei spezialisierte Trainings-Modi:
+
+A) Fitness-Dashboard: Klassisches Krafttraining (Brustpresse, Latzug, etc.).
+B) CrossFit: Hochintensive Zirkeltrainings (Burpees, Kettlebell Swings, etc.) inklusive Tausch-Funktion für Übungen.
+C) Awakened: Ein spezieller Modus für fortgeschrittene Quests.
+
+BESONDERHEITEN IM TRAINING:
+- Tages-Sicherung: Ein generierter Plan bleibt 24 Stunden lang aktiv.
+- Fortschritts-Speicherung: Haken und eingetragene Sätze werden SOFORT gespeichert. Sie bleiben erhalten, auch wenn du die App schließt oder YouTube-Videos schaust.
+- Automatischer Reset: Am nächsten Tag startet eine neue Quest.
+
+4. KI-PROGRESSION (DIE STEIGERUNG)
+----------------------------------
+Die App agiert als dein Coach:
+- Erfolg = Steigerung: Hast du alle Sätze einer Übung geschafft, erhöht die KI beim nächsten Mal das Gewicht (+2.5kg), die Wiederholungen oder die Zeit (+30s).
+- Misserfolg = Plateauschutz: Wenn du Sätze nicht schaffst, hält die KI die Werte konstant, bis du stärker wirst.
+
+5. HELDEN-STATISTIK (DEIN FORTSCHRITT)
+--------------------------------------
+- Zacken-Diagramm: Visualisiert deine Leistung (Reps/Gewicht) in einer klaren Stufen-Optik. 
+- Interaktives Wischen: Durch Wischen über das Diagramm siehst du oben exakt das Datum und deine Leistung.
+- Historie: Eine detaillierte Liste aller Trainings.
+- Fette Reps-Anzeige: Deine geschafften Wiederholungen werden in der Liste groß und deutlich hervorgehoben.
+- Satz-Details: Einblick in jeden einzelnen absolvierten Satz (z.B. 12 | 10 | 10).
+
+6. DETAIL-INFOS & VIDEOS
+------------------------
+- Goldener Info-Button (i): Befindet sich oben rechts auf jeder Übungskarte.
+- Video-Anleitung: Öffnet direkt YouTube mit dem passenden Technik-Video für die jeweilige Übung.
+- Profi-Tipps: Jede Übung hat spezifische Hinweise zur korrekten Ausführung und Atmung.
+
+7. TECHNIK & DESIGN
+-------------------
+- Design: Einzigartiger "Fantasy-Rune"-Look in Gold, Schwarz und Grau.
+- Datenbank: Alle Daten (Essen, Training, Profil) werden lokal und sicher auf deinem Gerät gespeichert (Room Database).
+
+==================================================
+ENDE DES HANDBUCHS - VIEL ERFOLG BEI DEINER QUEST!
+==================================================

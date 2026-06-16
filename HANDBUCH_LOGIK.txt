@@ -1,0 +1,52 @@
+==================================================
+FANTASY NUTRITION & FITNESS - LOGIK-HANDBUCH
+==================================================
+
+Dieses Dokument beschreibt die interne Logik und die Berechnungsalgorithmen der App.
+
+1. ÜBUNGS-KATEGORISIERUNG
+-------------------------
+Die KI erkennt automatisch den Typ einer Übung anhand ihres Namens:
+- WEIGHTED (Gewicht): Alles mit "Presse", "Hantel", "Maschine", "Latzug", "Curl".
+- TIME (Zeit): Alles mit "Crosstrainer", "Plank", "Hold", "Bike", "Laufband".
+- BODYWEIGHT (Eigengewicht): Alles andere (z.B. "Liegestütze", "Sit-ups").
+
+2. PROGRESSIONS-LOGIK (KI-COACH)
+--------------------------------
+Das Herzstück der App ist die "ExerciseLogic". Sie entscheidet, wie du dich steigerst:
+
+A) Gewichtsbasiert (Weighted):
+- Erfolg: Gewicht +2.5 kg.
+- Fail: Gewicht bleibt gleich.
+
+B) Eigengewicht (Bodyweight):
+- Erfolg: Sätze erhöhen (bis 5), danach Schwierigkeits-Level +1.
+
+C) Zeitbasiert (Time):
+- Erfolg: Zielzeit +30 Sekunden.
+
+3. FINAL LIMIT FREEZE (PLATEAU-SCHUTZ)
+--------------------------------------
+Die KI überwacht die strukturelle Leistung. Ein Limit wird aktiv wenn:
+- 3 Fails in Folge.
+- Erfolgsquote < 65% über 10 Sessions.
+- Plateau (keine Steigerung über 5 Sessions).
+Logik: Jegliche Erhöhung wird gesperrt (Freeze), bis 2 Einheiten stabil geschafft wurden oder die Quote > 75% steigt.
+
+4. PRO-TIMER LOGIK (FOREGROUND SERVICE)
+---------------------------------------
+Um maximale Stabilität zu gewährleisten, nutzt der Timer einen Android Service:
+- Persistence: Die Restzeit wird im Service berechnet (remainingMs = total - elapsed).
+- Lifecycle: Der Timer überlebt Activity-Recreation, Rotation und Hintergrund-Modus.
+- Alarm-Dauerschleife: Nutzt MediaPlayer (looping = true) auf dem Alarm-Kanal.
+- Stop-Bedingung: Alarm läuft, bis der User das "STOP" Signal sendet (Service-Intent).
+
+5. SMART SESSION ADJUSTMENT
+---------------------------
+- Keyword-Scanner (Regex) für Daily Check-in.
+- Multiplikator-System: RECOVERY (0.7x), SHORT (0.9x), NORMAL (1.0x), PUSH (1.15x).
+- Rundungs-Logik: Gewichte werden auf 0.25kg Schritte gerundet.
+
+==================================================
+ENDE DER LOGIK-BESCHREIBUNG
+==================================================

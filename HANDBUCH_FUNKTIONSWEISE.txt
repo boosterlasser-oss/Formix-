@@ -1,0 +1,103 @@
+==================================================
+FANTASY NUTRITION & FITNESS PLANNER - HANDBUCH
+==================================================
+
+Dieses Handbuch beschreibt die komplette Funktionsweise der App nach allen durchgeführten Fixes.
+
+1. RUNE.AI ONBOARDING
+---------------------
+Beim ersten Start übernimmt der RUNE.AI Agent. Er fragt Name, Alter, Gewicht, Ziel und Erfahrung ab.
+- Berechnung: Basierend auf den Daten wird dein TDEE (Kalorienbedarf) berechnet.
+- Ziel-Fokus: Wählst du "Muskelaufbau", "Fettverbrennung" oder "Fitness", passt die KI die Pläne entsprechend an.
+
+2. DAS TRAININGSSYSTEM (DIE QUESTS)
+-----------------------------------
+Es gibt drei Hauptbereiche: Fitness-Dashboard, CrossFit und Awakened.
+
+A) Tages-Speicherung (Persistence):
+- Ein Trainingsplan wird einmal pro Tag generiert und bleibt 24 Stunden lang fest.
+- Fortschritts-Garantie: Jeder Haken und jeder eingetragene Satz wird SOFORT gespeichert.
+- YouTube-Sicherheit: Wenn du die App verlässt, um ein Video zu schauen oder die Tastensperre aktivierst, sind beim Zurückkehren alle Haken und Werte noch da.
+- Täglicher Reset: Am nächsten Tag (neues Datum) wird der alte Plan gelöscht und ein neuer generiert.
+
+B) Die Progressions-Logik (KI-Entscheidungen):
+Die KI berechnet nach jedem Training den "Next Step" basierend auf dem "allSuccessful"-Status (Alle Sätze müssen abgehakt sein):
+- GEWICHTS-ÜBUNGEN: Bei Erfolg wird das Gewicht fix um +2.5kg erhöht. Bei Fail wird das Gewicht für die nächste Einheit gehalten.
+- EIGENGEWICHT: Die KI steigert erst das Volumen (Sets: 3 -> 4 -> 5). Wenn 5 Sätze geschafft sind, wird das Schwierigkeits-Level der Übung um +1 erhöht.
+- ZEIT-ÜBUNGEN: Bei Erfolg wird das Zeit-Ziel (z.B. Planks) fix um +30 Sekunden erhöht.
+
+3. SMART SESSION ADJUSTMENT (DAILY CHECK-IN)
+--------------------------------------------
+Dein AI Coach passt das Training jeden Tag an deinen Zustand an. Dies geschieht in einem 3-Stufen-Prozess.
+
+STUFE 1: Keyword-Analyse (Der Scan)
+Die KI scannt deinen Check-in Text auf verborgene Signale:
+- RECOVERY-Signale: "schlecht", "müde", "krank", "schmerz", "muskelkater", "wenig schlaf".
+- PUSH-Signale: "fit", "motiviert", "energie", "bereit", "vollgas", "stark".
+- TIME-Signale: "wenig zeit", "schnell", "kurz", "zeitdruck".
+
+STUFE 1.5: Muskelkater-Erkennung
+Erkennt die KI Begriffe wie "Muskelkater" oder "Schmerz", wird automatisch der RECOVERY-Modus mit Fokus auf Mobilität aktiviert, um Verletzungen vorzubeugen.
+
+STUFE 2: Modus-Zuweisung
+- PUSH: Intensitätsfaktor 1.15x (Mehr Volumen/Power).
+- RECOVERY: Intensitätsfaktor 0.7x (Schutz & Heilung).
+- SHORT: Fokus auf Effizienz (Zeit sparen).
+
+STUFE 3: Mathematische Anpassung (Der Daily Layer)
+Die Basis-Werte aus der Progression werden für HEUTE wie folgt modifiziert:
+- PUSH: Sätze +1 (bis max 5), Reps +10%, Gewicht +5% (gerundet auf 0.25kg Schritte).
+- RECOVERY: Sätze werden auf 2 gedeckelt, Reps -30%, Gewicht -30%. Übungsanzahl wird auf die 2 wichtigsten limitiert.
+- SHORT: Sätze -1, Gewicht -5%. Übungsanzahl wird auf die 3 wichtigsten limitiert.
+
+4. FINAL LIMIT FREEZE & PLATEAU-BRECHER
+---------------------------------------
+Dieses System erkennt automatisch, wenn dein Körper an eine strukturelle Grenze stößt.
+
+A) Limit-Erkennung:
+Das Limit wird aktiviert (isLimitDetected), wenn:
+- 3 Mal hintereinander ein Fail auf dem aktuellen Level geloggt wurde.
+- Die Erfolgsquote (SuccessRate) der letzten 10 Versuche unter 65% fällt.
+- Ein Plateau erkannt wird (5 Sessions ohne messbare Steigerung).
+
+B) Freeze-Effekt:
+Ist das Limit aktiv, wird jegliche automatische Erhöhung (Gewicht, Reps, Sets, Zeit) gesperrt. Die Progression wird "eingefroren", um Überlastung zu vermeiden.
+
+C) Nutzerentscheidung (Das Modal):
+Beim Start erscheint eine Warnkarte. Du hast zwei Optionen:
+1. Stabilität wählen: Mit den eingefrorenen Werten weitertrainieren, bis das Plateau natürlich bricht.
+2. Leichtere Einheit: Ein einmaliges "Session-Override" (Gewicht -10%, Reps -15%), um neuen Anlauf zu nehmen.
+
+5. HELDEN-STATISTIK & DATEN
+---------------------------
+A) Daten-Audit:
+- Jedes Training wird als "WorkoutEntry" (Datum/Typ) gespeichert.
+- Jede Übung erzeugt einen "ExerciseLog" mit Erfolg-Flag.
+- Jeder Satz wird als "SetLog" (Reps/Gewicht/Zeit/Erfolg) archiviert.
+
+B) Visualisierung:
+- Das Zacken-Diagramm nutzt die Gesamtzahl der Reps oder das Gesamtvolumen pro Training, um den Fortschrittsgraph zu zeichnen.
+- Wisch-Funktion: Echtzeit-Abfrage der Datenbank beim Bewegen über die Graph-Knoten.
+
+6. ÜBUNGS-DETAILS & VIDEOS
+--------------------------
+An jeder Übungskarte gibt es jetzt den "Virtuellen fliegenden Button":
+- Goldener Info-Button (i): Öffnet die "Quest-Anleitung" mit Profi-Tipps.
+- Dynamische Suche: Falls kein direkter Video-Link hinterlegt ist, generiert die KI einen verschlüsselten Such-String für YouTube, der automatisch die präziseste Technik-Anleitung findet.
+
+7. PRO-TIMER SYSTEM (STABIL & LAUT)
+-----------------------------------
+Der neue sportliche Timer-Button bietet maximale Zuverlässigkeit während der Quest:
+- Foreground-Service: Der Timer wird im Hintergrund durch einen System-Dienst verwaltet. Er überlebt App-Wechsel, Displaysperre und Bildschirm-Rotation ohne Reset.
+- Sport-Look: Großer Button in Pill-Form mit Puls-Animation während der Laufzeit.
+- Alarm-Dauerschleife: Bei Ablauf ertönt ein lauter Alarm (looping), der erst durch manuelles "STOP" auf der Karte beendet wird.
+
+8. TECHNISCHE STRUKTUR
+----------------------
+- Source of Truth: Die Room-Datenbank (AppDb).
+- Logik-Kern: ExerciseLogic.kt (Progression & Limit-Check), TimerService.kt (Hintergrund-Zeitmessung) & TrainingFlowScreen.kt (UI-Steuerung).
+- UI-Framework: Jetpack Compose mit Fantasy-Theming.
+
+==================================================
+DEIN REICH. DEIN TRAINING. DEINE STATS.
+==================================================

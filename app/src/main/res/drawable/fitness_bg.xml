@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Dynamischer, sportlicher Verlauf als Hintergrund -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="135"
+                android:startColor="#1A5CFF"
+                android:centerColor="#00FF7F"
+                android:endColor="#F5F6FA"
+                android:gradientRadius="800"/>
+            <corners android:radius="0dp"/>
+        </shape>
+    </item>
+    <!-- Halbtransparente Overlay-Schicht für bessere Lesbarkeit -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#99000000" /> <!-- 60% Schwarz -->
+        </shape>
+    </item>
+</layer-list>
+

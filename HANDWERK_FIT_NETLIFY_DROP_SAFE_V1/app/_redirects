@@ -1,0 +1,7 @@
+# Netlify routing fix: keep real files working, rewrite unknown paths to index.html
+/exercise.html   /exercise.html   200
+/manifest.webmanifest  /manifest.webmanifest  200
+/sw.js           /sw.js           200
+/assets/*        /assets/:splat   200
+/animations/*    /animations/:splat 200
+/*               /index.html      200

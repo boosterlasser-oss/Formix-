@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#111111"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="icon" href="icon.png" type="image/png"/>
+<title>HANDWERK.FIT</title>
+<link rel="stylesheet" href="assets/styles.css"/>
+</head>
+<body>
+
+<div class="ob" id="onboarding" aria-hidden="false">
+  <div class="obInner obWelcome" id="obWelcome">
+    <div class="obAvatar"><img src="icon.png" alt="Coach"></div>
+    <div class="obH1">Hallo!</div>
+    <p class="obP">Ich bin dein persönlicher Coach.<br><span>Hier sind einige Fragen, um deinen<br>persönlichen Plan anzupassen.</span></p>
+  </div>
+
+  <div class="obInner" id="obQuestion" style="display:none">
+    <div class="obTopBar">
+      <button class="obBack" id="obBack" aria-label="Zurück">←</button>
+      <div class="obStep"><b id="obStepNr">01</b>&nbsp;&nbsp;<span id="obStepTxt">ZIEL UND FOKUS</span></div>
+      <div style="width:48px"></div>
+    </div>
+
+    <div class="obProgress" id="obProgress"></div>
+
+    <div class="obTitle" id="obTitle"></div>
+    <div class="obHint" id="obHint"></div>
+
+    <div class="obOptions" id="obOptions"></div>
+  </div>
+</div>
+
+<div class="obCta" id="obCta">
+  <div class="obCtaInner">
+    <button class="obBtn ghost" id="obNext">Ich bin bereit!</button>
+  </div>
+</div>
+
+<header class="app">
+  <div class="top">
+    <div class="brand">
+      <div class="icon"><img src="icon.png" alt="Icon"></div>
+      <div>
+        <h1>HANDWERK.FIT</h1>
+        <div class="sub">Fragen → Auto-Plan → Abhaken → Kalender</div>
+      </div>
+    </div>
+    <span class="pill" id="today"></span>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="setup">Start</button>
+    <button class="tab" data-tab="plan">Plan</button>
+    <button class="tab" data-tab="kalender">Kalender</button>
+  </div>
+</header>
+
+<main>
+<section id="tab-setup">
+  <div class="card">
+    <h2>Profil</h2>
+    <div class="content">
+      <div class="small" id="profileSummary"></div>
+      <div id="profileForm" style="margin-top:12px"></div>
+      <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap">
+        <button id="saveProfile">Profil speichern</button>
+        <button class="secondary" id="rebuildPlan">Plan neu erstellen</button>
+      </div>
+      <div class="small" style="margin-top:10px">Tipp: Gewicht & Zielgewicht kannst du jederzeit anpassen – der Plan wird darauf neu berechnet.</div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-plan" style="display:none">
+  <div class="card">
+    <h2>Dein Plan</h2>
+    <div class="content">
+      <div id="planMeta" class="small"></div>
+      <ul class="list" id="planList"></ul>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Training durchführen</h2>
+    <div class="content">
+      <div class="small">Hake ab. Danach im Kalender speichern.</div>
+      <div id="sessionList"></div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-kalender" style="display:none">
+  <div class="card">
+    <h2>Eintrag speichern</h2>
+    <div class="content">
+      <label>Datum</label>
+      <input type="date" id="logDate"/>
+      <label>Notiz (optional)</label>
+      <textarea id="logNote" placeholder="z. B. Schulter ok / Rücken gut / Gewicht..."></textarea>
+      <div style="display:flex; gap:10px; margin-top:10px">
+        <button id="saveLog">Speichern</button>
+        <button class="secondary" id="resetSession">Session Reset</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Letzte Einträge</h2>
+    <div class="content" id="history"></div>
+  </div>
+</section>
+</main>
+
+<div class="cta">
+  <div class="bar">
+    <button class="secondary" id="backBtn">Zurück</button>
+    <button id="nextBtn">Weiter</button>
+  </div>
+</div>
+
+<div class="modalOverlay" id="exModal" aria-hidden="true">
+  <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="exModalTitle">
+    <div class="modalHead">
+      <div>
+        <div class="t" id="exModalTitle">Übung</div>
+        <div class="s" id="exModalSub"></div>
+      </div>
+      <button class="modalClose" id="exModalClose">Schließen</button>
+    </div>
+    <div class="modalBody">
+      <div class="modalAnim" id="exModalAnimWrap">
+        <div class="modalAnimTop">
+          <div style="font-weight:950">Beispiel</div>
+          <div class="tag" id="exModalTag"></div>
+        </div>
+        <div class="modalAnimStage" id="exModalStage"></div>
+      </div>
+      <div class="modalText" id="exModalFull"></div>
+
+      <div class="glossWrap" id="exModalGlossWrap" style="display:none">
+        <div class="glossHead">
+          <div style="font-weight:950">Fachwörter erklärt</div>
+          <div class="tag">Kurz & verständlich</div>
+        </div>
+        <div class="glossBody" id="exModalGloss"></div>
+      </div>
+
+      <div class="ytLinkWrap" id="exModalYtLinkWrap" style="display:none">
+        <div class="ytLinkTop">
+          <div style="font-weight:950">Video (optional)</div>
+          <div class="tag">YouTube-Link</div>
+        </div>
+        <div class="ytLinkBody">
+          <div id="exModalYtLinks"></div>
+          <a class="ytBtn" id="exModalYtLink" href="#" target="_blank" rel="noopener" style="display:none">YouTube öffnen</a>
+          <div class="ytLinkNote" id="exModalYtLinkNote"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script defer src="assets/app.js"></script>
+</body>
+</html>

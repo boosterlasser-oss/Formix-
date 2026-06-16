@@ -1,0 +1,61 @@
+﻿
+Name                                                Length  
+----                                                ------  
+.gradle                                                     
+.idea                                                       
+app                                                         
+gradle                                                      
+HANDWERK_FIT_NETLIFY_DROP_SAFE_V1                           
+sceneview-2.2.1                                             
+3D_BODY_SELECTOR_IMPLEMENTATION.md                  4693    
+3D_SELECTOR_QUICK_REFERENCE.md                      3565    
+AKTIONSPLAN_JSON.md                                 3866    
+ANALYSE_ABGESCHLOSSEN.md                            4604    
+ANIMATION_FIX_APPLIED.md                            2551    
+ARCHITECTURE_AND_DATAFLOW.md                        23733   
+ARCHITECTURE_OVERVIEW.md                            16004   
+build.gradle.kts                                    206     
+BUILD_FIX_COMPLETE.md                               3972    
+BUILD_FIX_SUMMARY.md                                4151    
+build_output.txt                                    72      
+CHANGES_SUMMARY.md                                  4767    
+DEPLOYMENT_READY.md                                 8261    
+DOCUMENTATION_INDEX.md                              8518    
+DOCUMENTATION_INDEX_FINAL.md                        3062    
+DOKUMENTATION_TRAINING_LOGIK.txt                    2647    
+EXECUTIVE_SUMMARY.md                                11899   
+FINAL_BUILD_STATUS.md                               3615    
+FINAL_IMPLEMENTATION_SUMMARY.md                     8596    
+FINAL_SUMMARY.md                                    9788    
+FINAL_TEST_REPORT.md                                4384    
+gradle.properties                                   100     
+gradlew                                             49      
+gradlew.bat                                         50      
+HANDBUCH_APP.txt                                    1856    
+HANDBUCH_FUNKTIONSWEISE.txt                         6004    
+HANDBUCH_KOMPLETT.txt                               3428    
+HANDBUCH_LOGIK.txt                                  2307    
+HANDWERK_FIT_NETLIFY_DROP_SAFE_V1.zip               347196  
+hs_err_pid16816.log                                 407402  
+hs_err_pid25124.log                                 137710  
+IMPLEMENTATION_CHECKLIST.md                         8203    
+JSON_ZUORDNUNG_ANALYSE.md                           8992    
+local.properties                                    367     
+LOTTIE_IMPLEMENTATION_GUIDE.md                      12295   
+Meshy_AI_Titanic_Physique_0214134849_texture.glb    24164200
+Meshy_AI__game_figure_Create_0214140326_texture.glb 11378684
+PROJEKT_ABGESCHLOSSEN.md                            6071    
+PROMPT_KONTROLLE_KOMPLETT.md                        8185    
+QUICK_DEPLOYMENT_CHECKLIST.md                       4327    
+QUICK_START_LOTTIE.md                               7710    
+README_LOTTIE.md                                    8549    
+rezepte_500_de.csv                                  101898  
+sceneview-2.2.1.aar                                 2052596 
+settings.gradle.kts                                 285     
+START_HERE.md                                       7052    
+START_HERE_LOTTIE.bat                               4308    
+START_HERE_LOTTIE.sh                                1133    
+TESTING_AND_DEPLOYMENT_GUIDE.md                     9882    
+_sceneview_dir.txt                                  0       
+
+

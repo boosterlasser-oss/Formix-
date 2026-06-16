@@ -1,0 +1,9 @@
+<resources>
+  <color name="fantasy_primary">#8E5DFF</color>
+  <color name="fantasy_secondary">#31D0AA</color>
+  <color name="fantasy_bg">#0E0A1F</color>
+  <color name="fantasy_surface">#171235</color>
+  <color name="fantasy_text">#FFFFFF</color>
+  <color name="fantasy_accent">#FFB84D</color>
+  <color name="fantasy_danger">#FF5D5D</color>
+</resources>

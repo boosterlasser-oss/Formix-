@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#0b1220"/>
+<title>Übung</title>
+<style>
+:root{--bg:#0b1220;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--txt:#eef3ff;--mut:rgba(238,243,255,.75);}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overscroll-behavior:none;}
+body{overflow:hidden;}
+.page{position:fixed;inset:0;display:flex;flex-direction:column;}
+header{flex:0 0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 8px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.20);backdrop-filter:blur(10px);}
+h1{margin:8px 0 0;font-size:18px;font-weight:900;}
+.meta{margin-top:4px;color:var(--mut);font-size:12px;line-height:1.25;}
+main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 14px calc(24px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain;touch-action:pan-y;}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:12px;margin-bottom:10px;}
+h2{margin:0 0 8px;font-size:15px;font-weight:900;}
+p{margin:0 0 8px;line-height:1.45;font-size:14px;}
+ol{margin:0;padding-left:20px;}
+li{margin:7px 0;line-height:1.45;font-size:14px;}
+.btnBack{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:var(--txt);border-radius:999px;padding:10px 14px;font-weight:900;}
+/* Roter YouTube Button */
+.ytBtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 14px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#ff0000;color:#fff;font-weight:900;text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,.18);margin-top:10px;}
+.ytBtn:active{transform:scale(.99);}
+.ytIcon{width:18px;height:18px;display:inline-block;background:currentColor;
+-webkit-mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M21.6 7.2s-.2-1.6-.8-2.3c-.8-.8-1.7-.8-2.1-.9C15.6 3.7 12 3.7 12 3.7h0s-3.6 0-6.7.3c-.4 0-1.3.1-2.1.9C2.6 5.6 2.4 7.2 2.4 7.2S2.1 9.1 2.1 11v1.8c0 1.9.3 3.8.3 3.8s.2 1.6.8 2.3c.8.8 1.9.8 2.4.9 1.7.2 6.4.3 6.4.3s3.6 0 6.7-.3c.4 0 1.3-.1 2.1-.9.6-.7.8-2.3.8-2.3s.3-1.9.3-3.8V11c0-1.9-.3-3.8-.3-3.8zM9.8 14.8V8.9l6 3-6 2.9z"/></svg>') center/contain no-repeat;
+mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M21.6 7.2s-.2-1.6-.8-2.3c-.8-.8-1.7-.8-2.1-.9C15.6 3.7 12 3.7 12 3.7h0s-3.6 0-6.7.3c-.4 0-1.3.1-2.1.9C2.6 5.6 2.4 7.2 2.4 7.2S2.1 9.1 2.1 11v1.8c0 1.9.3 3.8.3 3.8s.2 1.6.8 2.3c.8.8 1.9.8 2.4.9 1.7.2 6.4.3 6.4.3s3.6 0 6.7-.3c.4 0 1.3-.1 2.1-.9.6-.7.8-2.3.8-2.3s.3-1.9.3-3.8V11c0-1.9-.3-3.8-.3-3.8zM9.8 14.8V8.9l6 3-6 2.9z"/></svg>') center/contain no-repeat;}
+.term{padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);margin-top:10px;}
+.term b{display:block;margin-bottom:6px;}
+.muted{color:var(--mut);}
+
+
+/* PATCH_TABS: Ein-Screen Tabs (Ausführung / Fachwörter / Video) */
+.tabs{display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.14);}
+.tabBtn{flex:1 1 0;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:var(--txt);border-radius:999px;padding:9px 10px;font-weight:900;font-size:13px;}
+.tabBtn.active{
+  background: rgba(255,255,255,.18);
+}
+main{
+  /* kein Page-Scroll: Content Area übernimmt */
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+.panelWrap{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding:12px 12px calc(18px + env(safe-area-inset-bottom,0px));}
+.panel{ display:none; }
+.panel.active{ display:block; }
+
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <button class="btnBack" id="backBtn" type="button">← Zurück</button>
+    <h1 id="title">Übung</h1>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <main id="content">
+  <div class="tabs">
+    <button class="tabBtn active" data-tab="how" type="button">Ausführung</button>
+    <button class="tabBtn" data-tab="terms" type="button">Fachwörter</button>
+    <button class="tabBtn" data-tab="video" type="button">Video</button>
+  </div>
+
+  <div class="panelWrap" id="panelWrap">
+    <section class="panel active" id="tab-how">
+      <div class="card">
+        <h2>So führst du die Übung aus</h2>
+        <div id="desc"></div>
+        <ol id="cues"></ol>
+      </div>
+      <div class="muted" style="text-align:center;margin-top:10px;">HANDWERK FIT</div>
+    </section>
+
+    <section class="panel" id="tab-terms">
+      <div class="card">
+        <h2>Fachwörter erklärt</h2>
+        <div id="terms"></div>
+        <div class="muted" id="termsNote" style="margin-top:10px"></div>
+      </div>
+      <div class="muted" style="text-align:center;margin-top:10px;">HANDWERK FIT</div>
+    </section>
+
+    <section class="panel" id="tab-video">
+      <div class="card">
+        <h2>Video (optional)</h2>
+        <div id="videos"></div>
+      </div>
+      <div class="muted" style="text-align:center;margin-top:10px;">HANDWERK FIT</div>
+    </section>
+  </div>
+</main>
+</div>
+
+<script>
+(function(){
+  const scroller = document.getElementById('panelWrap');
+  let startY = 0;
+  const y = (e)=> (e.touches && e.touches.length ? e.touches[0].clientY : 0);
+  window.addEventListener('touchstart', (e)=>{ startY = y(e); }, {passive:true, capture:true});
+  window.addEventListener('touchmove', (e)=>{
+    if(!scroller) return;
+    const dy = y(e) - startY;
+    const atTop = scroller.scrollTop <= 0;
+    const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+    if((atTop && dy > 0) || (atBottom && dy < 0)){
+      e.preventDefault(); e.stopPropagation();
+    }
+  }, {passive:false, capture:true});
+})();
+
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  if(history.length>1) history.back();
+  else location.href='index.html';
+});
+
+function esc(s){return String(s??'').replace(/</g,'&lt;');}
+
+function genExplain(name){
+  const n=(name||"").toLowerCase();
+  if(/klimmz/.test(n)) return "Klimmzug: Starte aus dem Hang, aktiviere zuerst die Schultern (runterziehen), dann ziehst du Brust Richtung Stange. Senke kontrolliert ab.";
+  if(/latzug|lat\s*pull/.test(n)) return "Latzug: Brust hoch, Schultern unten. Ziehe die Stange zur oberen Brust und lasse sie kontrolliert wieder hoch.";
+  if(/rudern|row|kabelrudern|maschinenrudern/.test(n)) return "Rudern: Zieh zum Bauch/untere Brust, Schulterblätter nach hinten/unten. Kontrolliert zurück – kein Rundrücken.";
+  if(/bankdr|bench/.test(n)) return "Bankdrücken: Schulterblätter fixieren, Stange kontrolliert zur Brust, dann senkrecht hochdrücken. Stabiler Stand mit festen Füßen.";
+  if(/schulterdr|overhead|arnold/.test(n)) return "Schulterdrücken: Rippen unten, Bauch/Po fest. Drücke über Kopf und senke langsam ab, ohne ins Hohlkreuz zu fallen.";
+  if(/kniebeuge|squat/.test(n)) return "Kniebeuge: Hüfte nach hinten/unten, Knie folgen den Zehen. Rücken neutral, Druck über ganze Fußsohle, sauber hoch.";
+  if(/beinpresse|leg press/.test(n)) return "Beinpresse: Füße stabil, kontrolliert beugen und strecken, ohne Knie zu blockieren. Becken bleibt an der Lehne.";
+  if(/kreuzheben|deadlift|rdl|hip hinge/.test(n)) return "Hip-Hinge/Kreuzheben: Hüfte nach hinten schieben, Rücken neutral, Gewicht nah am Körper. Ruhig ablassen, kraftvoll aufrichten.";
+  if(/bizeps|curl/.test(n)) return "Bizepscurls: Ellbogen bleiben ruhig am Körper. Hochcurlen ohne Schwung, langsam ablassen und Spannung halten.";
+  if(/trizeps|pushdown/.test(n)) return "Trizeps am Kabel: Ellbogen fix, nach unten strecken, kontrolliert zurück. Schultern bleiben unten.";
+  if(/crunch|sit-?up|bauch/.test(n)) return "Bauchübung: Rippen Richtung Becken ziehen, kontrolliert aufrollen. Nacken lang, nicht am Kopf ziehen.";
+  return "Führe die Übung kontrolliert aus: stabiler Rumpf, sauberer Bewegungsweg, keine ruckartigen Wiederholungen. Stoppe bei Schmerz.";
+}
+function genCues(name){
+  const n=(name||"").toLowerCase();
+  if(/klimmz/.test(n)) return ["Schulter zuerst aktivieren (runterziehen)", "Rumpf fest – kein Schwung", "Oben kurz halten, langsam ablassen"];
+  if(/latzug/.test(n)) return ["Brust hoch, Schultern unten", "Zur oberen Brust ziehen", "Kontrolliert hochlassen – kein Schwung"];
+  if(/rudern|row/.test(n)) return ["Brust raus, Rücken neutral", "Zug zum Bauch – Ellbogen nah", "Endposition kurz halten"];
+  if(/bankdr|bench/.test(n)) return ["Schulterblätter nach hinten/unten", "Stange kontrolliert zur Brust", "Senkrecht hoch – Handgelenke gerade"];
+  if(/schulterdr|overhead/.test(n)) return ["Bauch/Po fest (kein Hohlkreuz)", "Ellenbogen leicht vor dem Körper", "Langsam ablassen, oben stabil"];
+  if(/kniebeuge|squat/.test(n)) return ["Druck über ganze Fußsohle", "Knie folgen den Zehen", "Rücken neutral – kontrolliert tief"];
+  if(/beinpresse/.test(n)) return ["Becken bleibt an der Lehne", "Knie nicht einknicken lassen", "Nicht komplett einrasten oben"];
+  if(/deadlift|rdl|hip hinge|kreuzheben/.test(n)) return ["Hüfte nach hinten schieben", "Gewicht nah am Körper", "Rücken neutral, kontrolliert"];
+  if(/bizeps|curl/.test(n)) return ["Ellbogen am Körper", "Keine Schwünge", "Langsam ablassen – Spannung halten"];
+  if(/trizeps|pushdown/.test(n)) return ["Ellbogen fix", "Unten strecken", "Kontrolliert zurück bis ~90°"];
+  return ["Langsam & sauber", "Kein Schwung", "Schmerzfrei trainieren"];
+}
+
+function mkUrl(query){
+  let q = String(query||'').trim();
+  if(/handtuch/i.test(q)) q = "Klimmzug Handtuch (Towel Pull Up)";
+  const qq = encodeURIComponent(q + " Übung Fitness Workout richtige Ausführung");
+  return "https://m.youtube.com/results?search_query=" + qq;
+}
+function openExternal(url){
+  const u = String(url||"");
+
+  const ua = navigator.userAgent || "";
+  const isAndroid = /Android/i.test(ua);
+  // typische Marker für Android WebView / WebIntoApp
+  const isWebView = /\bwv\b|; wv\)|Version\/\d+\.\d+.*Chrome\/\d+.*Mobile/i.test(ua) || /WebIntoApp|webintoapp/i.test(ua);
+
+  const isYouTube = /(^|\/)(m\.)?youtube\.com\//i.test(u) || /youtu\.be\//i.test(u);
+
+  // ✅ Netlify / normaler Browser: KEIN intent:// → öffne extern in neuem Tab
+  if(isYouTube && (!isAndroid || !isWebView)){
+    window.open(u, "_blank", "noopener");
+    return;
+  }
+
+  // ✅ Android WebView: intent:// öffnet die YouTube-App + Fallback zurück
+  if(isYouTube && isAndroid && isWebView){
+    try{
+      const httpsUrl = u.startsWith('http') ? u : ('https://' + u.replace(/^\/+/, ''));
+      const intentUrl = 'intent://' + httpsUrl.replace(/^https?:\/\//,'')
+        + '#Intent;scheme=https;package=com.google.android.youtube;'
+        + 'S.browser_fallback_url=' + encodeURIComponent(httpsUrl) + ';end';
+      window.location.href = intentUrl;
+      return;
+    }catch(e){
+      // Fallback unten
+    }
+  }
+
+  // Standard
+  window.location.href = u;
+}
+
+// PATCH_TABS_JS: Tabs umschalten (ohne Page-Scroll)
+(function(){
+  const pw = document.getElementById('panelWrap');
+  const btns = Array.from(document.querySelectorAll('.tabBtn'));
+  const panels = {
+    how: document.getElementById('tab-how'),
+    terms: document.getElementById('tab-terms'),
+    video: document.getElementById('tab-video')
+  };
+  const setTab = (k)=>{
+    btns.forEach(b=> b.classList.toggle('active', b.dataset.tab===k));
+    Object.entries(panels).forEach(([key,el])=>{
+      if(!el) return;
+      el.classList.toggle('active', key===k);
+    });
+    if(pw) pw.scrollTop = 2; // nie ganz oben (gegen WebView refresh)
+  };
+  btns.forEach(b=>{
+    b.addEventListener('click', ()=> setTab(b.dataset.tab));
+  });
+  window.__setExerciseTab = setTab;
+})();
+
+function render(payload){
+  // PATCH_FALLBACKS_V1: Falls Erklärungen fehlen -> sinnvolle Standardtexte
+  const exName = (payload.ytQuery || payload.title || "").toString().trim();
+  if(!payload.desc || !String(payload.desc).trim()){
+    payload.desc = exName
+      ? ("Kurzanleitung: Starte kontrolliert, halte den Rumpf stabil und führe jede Wiederholung sauber aus. Arbeite im vollen, schmerzfreien Bewegungsradius und stoppe, wenn Technik bricht.")
+      : "Kurzanleitung: Starte kontrolliert, halte den Rumpf stabil und führe jede Wiederholung sauber aus.";
+  }
+  if(!Array.isArray(payload.cues) || payload.cues.length===0){
+    payload.cues = [
+      "1) Ausgangsposition stabil einnehmen (Rumpf anspannen).",
+      "2) Bewegung langsam starten – kontrolliert hoch, kontrolliert runter.",
+      "3) Atmung: Anstrengung = ausatmen, Rückweg = einatmen.",
+      "4) Stopp, wenn du Schwung brauchst oder Schmerzen auftreten."
+    ];
+  }
+  if(!Array.isArray(payload.terms) || payload.terms.length===0){
+    payload.terms = [
+      {t:"Satz / Sätze", d:"Eine Gruppe von Wiederholungen am Stück. Beispiel: 3 Sätze à 10 Wdh."},
+      {t:"Wdh. (Wiederholungen)", d:"Wie oft du die Bewegung pro Satz ausführst (z. B. 8–12)."},
+      {t:"Tempo", d:"Wie schnell du bewegst. Kontrolliert = sicherer und effektiver."}
+    ];
+  }
+
+  document.title = payload.title || "Übung";
+  document.getElementById('title').textContent = payload.title || "Übung";
+  document.getElementById('meta').textContent = payload.sub || payload.meta || "";
+
+  const nm=(payload.ytQuery||payload.title||'');
+  const dd=(payload.desc && String(payload.desc).trim()) ? payload.desc : genExplain(nm);
+  document.getElementById('desc').innerHTML = '<p>'+esc(dd)+'</p>';
+
+  const cuesEl=document.getElementById('cues');
+  cuesEl.innerHTML='';
+  (Array.isArray(payload.cues) && payload.cues.length ? payload.cues : genCues(payload.ytQuery||payload.title||'')).forEach(c=>{
+    const li=document.createElement('li'); li.innerHTML=esc(c); cuesEl.appendChild(li);
+  });
+
+  const termsEl=document.getElementById('terms');
+  const note=document.getElementById('termsNote');
+  termsEl.innerHTML=''; note.textContent='';
+  const terms = Array.isArray(payload.terms) ? payload.terms : [];
+  if(terms.length){
+    terms.forEach(t=>{
+      const div=document.createElement('div');
+      div.className='term';
+      div.innerHTML = '<b>'+esc(t.t||t.term||'')+'</b><div class="muted">'+esc(t.d||t.def||'')+'</div>';
+      termsEl.appendChild(div);
+    });
+  }else{
+    note.textContent="Noch keine Fachwörter hinterlegt.";
+  }
+
+  const vids=document.getElementById('videos');
+  vids.innerHTML='';
+  const links = Array.isArray(payload.ytLinks) ? payload.ytLinks : null;
+  const q = String(payload.ytQuery||'').trim();
+  const add = (label,url)=>{
+    const a=document.createElement('a');
+    a.href=url; a.className='ytBtn';
+    a.innerHTML='<span class="ytIcon"></span><span>'+esc(label)+'</span>';
+    a.addEventListener('click',(e)=>{e.preventDefault(); openExternal(url);});
+    vids.appendChild(a);
+  };
+
+  if(links && links.length){
+    links.forEach(x=>{
+      const label=x.label||'YouTube öffnen';
+      const url = x.url ? String(x.url) : mkUrl(x.query||x.ytQuery||'');
+      add(label,url);
+    });
+  } else if(q){
+    add('YouTube öffnen', mkUrl(q));
+    const d=document.createElement('div'); d.className='muted'; d.style.marginTop='10px';
+    d.innerHTML='Suche: <b>'+esc(q)+'</b>'; vids.appendChild(d);
+  } else {
+    vids.innerHTML='<div class="muted">Kein Video hinterlegt.</div>';
+  }
+
+  // start not at top
+  const pw=document.getElementById('panelWrap'); if(pw) pw.scrollTop = 2;
+}
+
+// PATCH_PAGESHOW_REFRESH: Bei jedem Öffnen/Zurückkommen neu aus sessionStorage laden
+function loadPayload(){
+  let payload = null;
+  try{ payload = JSON.parse(sessionStorage.getItem('currentExercise')||"null"); }catch(e){}
+  return payload;
+}
+
+function showFromStorage(){
+  const payload = loadPayload();
+  if(!payload){
+    const d=document.getElementById('desc');
+    if(d) d.innerHTML='<p class="muted">Keine Übung geladen. Bitte zurück zur Liste und erneut auswählen.</p>';
+    const c=document.getElementById('cues');
+    if(c) c.innerHTML='';
+    return;
+  }
+  render(payload);
+}
+
+showFromStorage();
+// Wenn WebView Seite cached (zurück/vor), trotzdem neu rendern
+window.addEventListener('pageshow', ()=>{ showFromStorage(); });
+
+</script>
+</body>
+</html>

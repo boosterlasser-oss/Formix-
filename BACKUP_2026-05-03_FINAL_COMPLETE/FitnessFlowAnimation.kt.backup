@@ -1,0 +1,1008 @@
+package com.fantasyfoodplanner.features.fitness
+
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+
+/**
+ * Fitness Flow Animation - Röhren mit fließenden Partikeln
+ * 
+ * Basiert auf Energy Hub 3D App Konzept (energy_flow_overlay_v2.dart):
+ * - Exakte Kreise aus LabelMe JSON
+ * - Farben aus dem Original-Bild
+ * - Partikel fließen durch die Röhre (Glow + Core)
+ * - Smooth kontinuierlicher Fluss
+ */
+
+/**
+ * Daten-Modell für einen Fitness-Kreis aus LabelMe
+ */
+data class FitnessCircle(
+    val id: String,
+    val label: String,
+    val centerX: Float,  // Normalisiert 0.0 - 1.0
+    val centerY: Float,  // Normalisiert 0.0 - 1.0
+    val radius: Float,   // Normalisiert 0.0 - 1.0
+    val color: Color     // Farbe aus dem Bild
+)
+
+/**
+ * Daten-Modell für einen Linestrip (Linie von Gerät zur Mitte)
+ */
+data class FitnessLinestrip(
+    val id: String,
+    val points: List<Offset>,  // Normalisiert 0.0 - 1.0
+    val color: Color           // Farbe des Start-Geräts
+)
+
+/**
+ * MAIN COMPOSABLE - Fitness Flow Animation
+ * 
+ * Zeigt:
+ * 1. Röhren mit fließenden Linien an allen 7 Kreisen
+ * 2. Röhren mit Blitzen von den Geräten zur Mitte
+ */
+@Composable
+fun FitnessFlowAnimation(
+    modifier: Modifier = Modifier
+) {
+    // Kontinuierliche Flow-Animation (3.5 Sekunden)
+    val infiniteTransition = rememberInfiniteTransition(label = "fitness_flow")
+    val flowProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3500,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "flow"
+    )
+    
+    // Blitz-Animation (für Linestrips)
+    val lightningProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 1500, // 1.5 Sekunden - gemächlicher
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "lightning"
+    )
+    
+    // Puls-Animation (für kleine Kreise - explosionsartig)
+    val pulseProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 1500, // 1.5 Sekunden
+                easing = FastOutSlowInEasing // Schnell raus, langsam rein = explosionsartig
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "pulse"
+    )
+
+    // Kreise und Linestrips definieren
+    val circles = remember { createFitnessCircles() }
+    val linestrips = remember { createFitnessLinestrips() }
+
+    // Canvas zeichnen
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val canvasWidth = size.width
+        val canvasHeight = size.height
+
+        // 1. Zeichne alle Röhren mit Linien (um die Geräte)
+        circles.forEach { circle ->
+            // Große äußere Ring (13) mit Sternpartikeln
+            if (circle.id == "13") {
+                drawStarParticleCircle(
+                    circle = circle,
+                    flowProgress = flowProgress,
+                    canvasWidth = canvasWidth,
+                    canvasHeight = canvasHeight
+                )
+            }
+            // Kleine Kreise (14-19) mit Puls-Effekt
+            else if (circle.id in listOf("14", "15", "16", "17", "18", "19")) {
+                drawPulsingCircle(
+                    circle = circle,
+                    pulseProgress = pulseProgress,
+                    canvasWidth = canvasWidth,
+                    canvasHeight = canvasHeight
+                )
+            }
+            // Kreis 7 (Mitte) bekommt alle Farben
+            else if (circle.id == "7") {
+                drawMultiColorCircularTube(
+                    circle = circle,
+                    colors = circles.take(7).map { it.color }, // Nur die ersten 7 Farben
+                    flowProgress = flowProgress,
+                    canvasWidth = canvasWidth,
+                    canvasHeight = canvasHeight
+                )
+            }
+            // Große Kreise (1-6) mit rotierenden Blitzen
+            else {
+                drawCircularTube(
+                    circle = circle,
+                    flowProgress = flowProgress,
+                    canvasWidth = canvasWidth,
+                    canvasHeight = canvasHeight
+                )
+            }
+        }
+        
+        // 2. Zeichne Röhren mit Blitzen von Geräten zur Mitte
+        linestrips.forEach { linestrip ->
+            drawLightningLinestrip(
+                linestrip = linestrip,
+                lightningProgress = lightningProgress,
+                canvasWidth = canvasWidth,
+                canvasHeight = canvasHeight
+            )
+        }
+    }
+}
+
+/**
+ * Erstelle Fitness Circles aus LabelMe JSON
+ * 
+ * Bild: 1536x1024 px
+ * 
+ * LabelMe circle format: 2 Punkte [x1,y1], [x2,y2] definieren Bounding Box
+ * - Center: ((x1+x2)/2, (y1+y2)/2)
+ * - Radius: sqrt((x2-x1)² + (y2-y1)²) / 2
+ * 
+ * Farben aus dem Original-Bild:
+ * - Kreis 1 (Fahrrad oben): Orange
+ * - Kreis 2 (Bankdrücken links): Cyan
+ * - Kreis 3 (Yoga unten): Cyan/Türkis
+ * - Kreis 4 (Springseil rechts-unten): Orange/Gelb
+ * - Kreis 5 (Beinpresse links-unten): Lila
+ * - Kreis 6 (Klimmzüge rechts): Grün
+ * - Kreis 7 (Körper Mitte): Cyan-Türkis (Hauptfarbe)
+ */
+private fun createFitnessCircles(): List<FitnessCircle> {
+    val imageWidth = 1536f
+    val imageHeight = 1024f
+    
+    // Funktion zum Normalisieren
+    fun normalize(x: Float, y: Float, r: Float): Triple<Float, Float, Float> {
+        return Triple(x / imageWidth, y / imageHeight, r / imageWidth)
+    }
+    
+    // Funktion zum Berechnen von Center + Radius aus 2 Punkten (LabelMe Circle)
+    // LabelMe Format: Punkt 1 = Mittelpunkt, Punkt 2 = Punkt auf dem Kreis
+    // Radius = Abstand zwischen den beiden Punkten
+    fun calcCircle(x1: Float, y1: Float, x2: Float, y2: Float): Triple<Float, Float, Float> {
+        val cx = x1  // Punkt 1 ist der Mittelpunkt!
+        val cy = y1
+        val dx = x2 - x1
+        val dy = y2 - y1
+        val r = sqrt(dx * dx + dy * dy)  // Radius = Abstand zwischen den Punkten
+        return Triple(cx, cy, r)
+    }
+    
+    return listOf(
+        // Kreis 1 - Fahrrad (Label "1")
+        // Points: [[769.32, 159.37], [866.68, 227.79]]
+        calcCircle(769.32f, 159.37f, 866.68f, 227.79f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "1",
+                    label = "Fahrrad",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFFFFA500) // Orange
+                )
+            }
+        },
+        
+        // Kreis 2 - Bankdrücken (Label "2")
+        // Points: [[310.11, 365.95], [389.05, 471.21]]
+        calcCircle(310.11f, 365.95f, 389.05f, 471.21f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "2",
+                    label = "Bankdrücken",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00BFFF) // Cyan
+                )
+            }
+        },
+        
+        // Kreis 3 - Yoga (Label "3")
+        // Points: [[368.00, 713.32], [445.63, 810.68]]
+        calcCircle(368.00f, 713.32f, 445.63f, 810.68f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "3",
+                    label = "Yoga",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF9370DB) // Lila (KORRIGIERT)
+                )
+            }
+        },
+        
+        // Kreis 4 - Springseil (Label "4")
+        // Points: [[773.26, 847.53], [858.79, 930.42]]
+        calcCircle(773.26f, 847.53f, 858.79f, 930.42f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "4",
+                    label = "Springseil",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00CED1) // Türkis (KORRIGIERT)
+                )
+            }
+        },
+        
+        // Kreis 5 - Beinpresse (Label "5")
+        // Points: [[1165.37, 715.95], [1236.42, 813.32]]
+        calcCircle(1165.37f, 715.95f, 1236.42f, 813.32f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "5",
+                    label = "Beinpresse",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFFFFD700) // Gold (KORRIGIERT)
+                )
+            }
+        },
+        
+        // Kreis 6 - Klimmzüge (Label "6")
+        // Points: [[1216.68, 367.26], [1270.63, 481.74]]
+        calcCircle(1216.68f, 367.26f, 1270.63f, 481.74f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "6",
+                    label = "Klimmzüge",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00FF00) // Grün
+                )
+            }
+        },
+        
+        // Kreis 7 - Körper (Label "7")
+        // Points: [[769.32, 504.11], [881.16, 625.16]]
+        calcCircle(769.32f, 504.11f, 881.16f, 625.16f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "7",
+                    label = "Körper",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00BFFF) // Cyan (wie Bankdrücken - KORRIGIERT)
+                )
+            }
+        },
+        
+        // === KLEINE KREISE (mit Puls-Effekt) ===
+        
+        // Kreis 14 - Klein rechts außen (Label "14")
+        // Points: [[1325.0, 447.0], [1334.0, 484.0]]
+        calcCircle(1325.0f, 447.0f, 1334.0f, 484.0f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "14",
+                    label = "Klein_Rechts",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00FF00) // Grün (wie Kreis 6 - Klimmzüge)
+                )
+            }
+        },
+        
+        // Kreis 15 - Klein oben rechts (Label "15")
+        // Points: [[889.0, 210.0], [912.0, 240.0]]
+        calcCircle(889.0f, 210.0f, 912.0f, 240.0f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "15",
+                    label = "Klein_Oben",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFFFFA500) // Orange (wie Kreis 1 - Fahrrad)
+                )
+            }
+        },
+        
+        // Kreis 16 - Klein links außen (Label "16")
+        // Points: [[194.0, 452.0], [222.0, 476.0]]
+        calcCircle(194.0f, 452.0f, 222.0f, 476.0f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "16",
+                    label = "Klein_Links",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00BFFF) // Cyan (wie Kreis 2 - Bankdrücken)
+                )
+            }
+        },
+        
+        // Kreis 17 - Klein links unten (Label "17")
+        // Points: [[252.0, 798.0], [282.0, 823.0]]
+        calcCircle(252.0f, 798.0f, 282.0f, 823.0f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "17",
+                    label = "Klein_Links_Unten",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF9370DB) // Lila (wie Kreis 3 - Yoga)
+                )
+            }
+        },
+        
+        // Kreis 18 - Klein unten Mitte (Label "18")
+        // Points: [[874.0, 920.0], [898.0, 950.0]]
+        calcCircle(874.0f, 920.0f, 898.0f, 950.0f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "18",
+                    label = "Klein_Unten",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00CED1) // Türkis (wie Kreis 4 - Springseil)
+                )
+            }
+        },
+        
+        // Kreis 19 - Klein rechts unten (Label "19")
+        // Points: [[1270.0, 798.0], [1295.0, 826.0]]
+        calcCircle(1270.0f, 798.0f, 1295.0f, 826.0f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "19",
+                    label = "Klein_Rechts_Unten",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFFFFD700) // Gold (wie Kreis 5 - Beinpresse)
+                )
+            }
+        },
+        
+        // === GROSSER ÄUSSERER KREIS (mit Sternpartikeln) ===
+        
+        // Kreis 13 - Ganz großer äußerer Kreis (Label "13")
+        // Points: [[769.32, 510.68], [870.63, 894.89]]
+        calcCircle(769.32f, 510.68f, 870.63f, 894.89f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "13",
+                    label = "Aeusserer_Ring",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFFFFFFFF).copy(alpha = 0.6f) // Weiß/neutral
+                )
+            }
+        }
+    )
+}
+
+/**
+ * Zeichne kreisförmige Röhre mit fließenden Partikeln
+ * 
+ * Wie Energy Hub energy_flow_overlay_v2.dart:
+ * 1. Röhre zeichnen (drawPath mit Stroke)
+ * 2. Partikel durch die Röhre fließen lassen (Glow + Core)
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCircularTube(
+    circle: FitnessCircle,
+    flowProgress: Float,
+    canvasWidth: Float,
+    canvasHeight: Float
+) {
+    // Konvertiere normalisierte Koordinaten zu Pixel
+    val centerX = circle.centerX * canvasWidth
+    val centerY = circle.centerY * canvasHeight
+    val radiusPx = circle.radius * canvasWidth
+    
+    // Erstelle Kreis-Pfad (360 Grad, viele Punkte für smooth circle)
+    val circlePoints = mutableListOf<Offset>()
+    val segments = 60 // 60 Segmente für glatten Kreis
+    
+    for (i in 0..segments) {
+        val angle = (i.toFloat() / segments) * 2f * PI.toFloat()
+        val x = centerX + radiusPx * cos(angle)
+        val y = centerY + radiusPx * sin(angle)
+        circlePoints.add(Offset(x, y))
+    }
+    
+    // 1. Zeichne Röhre (die Kreis-Linie selbst)
+    val tubePath = Path().apply {
+        moveTo(circlePoints.first().x, circlePoints.first().y)
+        for (i in 1 until circlePoints.size) {
+            lineTo(circlePoints[i].x, circlePoints[i].y)
+        }
+        close() // Schließe den Kreis
+    }
+    
+    // Röhre zeichnen mit Stroke (wie Energy Hub: strokeWidth = lineWidth)
+    drawPath(
+        path = tubePath,
+        color = circle.color.copy(alpha = 0.85f), // Aktive Opacity wie im Energy Hub
+        style = Stroke(
+            width = 3f, // lineWidth aus Energy Hub
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round
+        )
+    )
+    
+    // 2. Zeichne Partikel durch die Röhre (wie Energy Hub: particles = 3)
+    drawParticlesAlongTube(
+        circlePoints = circlePoints,
+        color = circle.color,
+        flowProgress = flowProgress
+    )
+}
+
+/**
+ * Zeichne kreisförmige Röhre mit ALLEN Farben (nur für Kreis 7 - Mitte)
+ * 
+ * Die Röhre zeigt alle 7 Farben als Segmente, rotierend
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawMultiColorCircularTube(
+    circle: FitnessCircle,
+    colors: List<Color>,
+    flowProgress: Float,
+    canvasWidth: Float,
+    canvasHeight: Float
+) {
+    // Konvertiere normalisierte Koordinaten zu Pixel
+    val centerX = circle.centerX * canvasWidth
+    val centerY = circle.centerY * canvasHeight
+    val radiusPx = circle.radius * canvasWidth
+    
+    // Erstelle Kreis-Pfad (360 Grad, viele Punkte für smooth circle)
+    val circlePoints = mutableListOf<Offset>()
+    val segments = 60 // 60 Segmente für glatten Kreis
+    
+    for (i in 0..segments) {
+        val angle = (i.toFloat() / segments) * 2f * PI.toFloat()
+        val x = centerX + radiusPx * cos(angle)
+        val y = centerY + radiusPx * sin(angle)
+        circlePoints.add(Offset(x, y))
+    }
+    
+    // 1. Zeichne Röhre mit ALLEN Farben (Segmente)
+    val colorCount = colors.size
+    val pointsPerColor = segments / colorCount
+    val rotationOffset = (flowProgress * segments).toInt() // Rotiert mit flowProgress
+    
+    for (colorIndex in 0 until colorCount) {
+        val startIndex = (colorIndex * pointsPerColor + rotationOffset) % segments
+        
+        // Zeichne Segment mit dieser Farbe
+        val segmentPath = Path()
+        var firstPoint = true
+        
+        for (i in 0..pointsPerColor) {
+            val index = (startIndex + i) % (segments + 1)
+            if (index < circlePoints.size) {
+                if (firstPoint) {
+                    segmentPath.moveTo(circlePoints[index].x, circlePoints[index].y)
+                    firstPoint = false
+                } else {
+                    segmentPath.lineTo(circlePoints[index].x, circlePoints[index].y)
+                }
+            }
+        }
+        
+        drawPath(
+            path = segmentPath,
+            color = colors[colorIndex].copy(alpha = 0.85f),
+            style = Stroke(
+                width = 3f,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
+            )
+        )
+    }
+    
+    // 2. Zeichne Partikel durch die Röhre (mit allen Farben)
+    drawParticlesAlongTube(
+        circlePoints = circlePoints,
+        color = circle.color, // Haupt-Farbe für Partikel
+        flowProgress = flowProgress
+    )
+}
+
+/**
+ * Zeichne blitzartige Linien entlang der Röhre
+ * 
+ * Anstatt Punkte: In die Länge gezogene Linien die um die Kreise herum kreisen
+ * - 3 Linien pro Kreis
+ * - Jede Linie hat einen "Schweif" (gestreckt in Bewegungsrichtung)
+ * - Glow-Effekt für blitzartiges Aussehen
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawParticlesAlongTube(
+    circlePoints: List<Offset>,
+    color: Color,
+    flowProgress: Float
+) {
+    if (circlePoints.size < 2) return
+    
+    // Berechne Segment-Längen
+    val segmentLengths = mutableListOf<Float>()
+    var totalLength = 0f
+    
+    for (i in 0 until circlePoints.size - 1) {
+        val dx = circlePoints[i + 1].x - circlePoints[i].x
+        val dy = circlePoints[i + 1].y - circlePoints[i].y
+        val length = sqrt(dx * dx + dy * dy)
+        segmentLengths.add(length)
+        totalLength += length
+    }
+    
+    if (totalLength <= 0f) return
+    
+    // 3 blitzartige Linien
+    val lineCount = 3
+    val lineLength = 40f // Länge der gestreckten Linie in Pixeln
+    
+    for (i in 0 until lineCount) {
+        val offset = i.toFloat() / lineCount
+        val t = (flowProgress + offset) % 1f
+        
+        // Start-Position der Linie (vorne)
+        val startDist = t * totalLength
+        // End-Position der Linie (hinten - Schweif)
+        val endDist = (startDist - lineLength).coerceAtLeast(0f)
+        
+        // Finde Start-Position
+        val startPos = findPositionOnPath(circlePoints, segmentLengths, totalLength, startDist)
+        // Finde End-Position (Schweif)
+        val endPos = findPositionOnPath(circlePoints, segmentLengths, totalLength, endDist)
+        
+        if (startPos != null && endPos != null) {
+            // Zeichne Glow-Linie (breiter, transparenter)
+            drawLine(
+                color = color.copy(alpha = 0.3f),
+                start = endPos,
+                end = startPos,
+                strokeWidth = 6f,
+                cap = StrokeCap.Round,
+                blendMode = BlendMode.Plus
+            )
+            
+            // Zeichne Core-Linie (dünner, intensiv)
+            drawLine(
+                color = color.copy(alpha = 0.9f),
+                start = endPos,
+                end = startPos,
+                strokeWidth = 2.5f,
+                cap = StrokeCap.Round
+            )
+        }
+    }
+}
+
+/**
+ * Zeichne kleine Kreise mit explosionsartigem Puls-Effekt
+ * 
+ * - Röhre kreisförmig (wie die großen Kreise)
+ * - Lichtimpuls/Explosion von der Mitte nach außen
+ * - Pulsiert kontinuierlich
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawPulsingCircle(
+    circle: FitnessCircle,
+    pulseProgress: Float,
+    canvasWidth: Float,
+    canvasHeight: Float
+) {
+    // Konvertiere normalisierte Koordinaten zu Pixel
+    val centerX = circle.centerX * canvasWidth
+    val centerY = circle.centerY * canvasHeight
+    val radiusPx = circle.radius * canvasWidth
+    
+    // 1. Zeichne die Röhre (statisch)
+    drawCircle(
+        color = circle.color.copy(alpha = 0.85f),
+        radius = radiusPx,
+        center = Offset(centerX, centerY),
+        style = Stroke(
+            width = 3f,
+            cap = StrokeCap.Round
+        )
+    )
+    
+    // 2. Zeichne Puls-Effekt (explosionsartig von Mitte nach außen)
+    // Mehrere Ringe für Explosion-Effekt
+    val pulseCount = 3
+    
+    for (i in 0 until pulseCount) {
+        val offset = i.toFloat() / pulseCount
+        val adjustedProgress = (pulseProgress + offset) % 1f
+        
+        // Radius wächst von 0 bis zum vollen Radius
+        val currentRadius = radiusPx * adjustedProgress
+        
+        // Alpha fällt ab während der Puls wächst (verschwindet nach außen)
+        val alpha = (1f - adjustedProgress) * 0.6f
+        
+        if (alpha > 0.05f && currentRadius > 0f) {
+            // Glow-Effekt (breiter)
+            drawCircle(
+                color = circle.color.copy(alpha = alpha * 0.5f),
+                radius = currentRadius,
+                center = Offset(centerX, centerY),
+                style = Stroke(
+                    width = 6f,
+                    cap = StrokeCap.Round
+                ),
+                blendMode = BlendMode.Plus
+            )
+            
+            // Core-Effekt (dünner, intensiver)
+            drawCircle(
+                color = circle.color.copy(alpha = alpha),
+                radius = currentRadius,
+                center = Offset(centerX, centerY),
+                style = Stroke(
+                    width = 2f,
+                    cap = StrokeCap.Round
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Zeichne großen äußeren Kreis mit langsam rotierenden Sternpartikeln
+ * 
+ * - Röhre kreisförmig (statisch) - NICHT SICHTBAR!
+ * - Kleine Sternpartikel die langsam um den Kreis rotieren
+ * - Größere Abstände zwischen den Partikeln
+ * - Kompletten Umfang abdecken
+ * - Partikel schweben frei im Kreis
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawStarParticleCircle(
+    circle: FitnessCircle,
+    flowProgress: Float,
+    canvasWidth: Float,
+    canvasHeight: Float
+) {
+    // Konvertiere normalisierte Koordinaten zu Pixel
+    val centerX = circle.centerX * canvasWidth
+    val centerY = circle.centerY * canvasHeight
+    val radiusPx = circle.radius * canvasWidth
+    
+    // 1. KEINE Röhre zeichnen - nur die Sternpartikel sollen sichtbar sein!
+    // Die Partikel schweben frei im Kreis
+    
+    // 2. Zeichne Sternpartikel entlang des Kreises (freischwebend!)
+    val particleCount = 8 // Weniger Partikel = größere Abstände
+    
+    for (i in 0 until particleCount) {
+        // Position auf dem Kreis berechnen (langsam rotierend)
+        val baseAngle = (i.toFloat() / particleCount) * 2f * PI.toFloat()
+        val rotationOffset = flowProgress * 2f * PI.toFloat() * 0.3f // 0.3 = langsamer als normale flowProgress
+        val angle = baseAngle + rotationOffset
+        
+        val x = centerX + radiusPx * cos(angle)
+        val y = centerY + radiusPx * sin(angle)
+        
+        // Zeichne Sternpartikel (4-zackiger Stern aus Linien)
+        val starSize = 4f
+        
+        // Glow-Effekt
+        drawLine(
+            color = circle.color.copy(alpha = 0.4f),
+            start = Offset(x - starSize, y),
+            end = Offset(x + starSize, y),
+            strokeWidth = 2f,
+            cap = StrokeCap.Round,
+            blendMode = BlendMode.Plus
+        )
+        drawLine(
+            color = circle.color.copy(alpha = 0.4f),
+            start = Offset(x, y - starSize),
+            end = Offset(x, y + starSize),
+            strokeWidth = 2f,
+            cap = StrokeCap.Round,
+            blendMode = BlendMode.Plus
+        )
+        
+        // Core (heller Mittelpunkt)
+        drawCircle(
+            color = circle.color.copy(alpha = 0.8f),
+            radius = 1.5f,
+            center = Offset(x, y),
+            blendMode = BlendMode.Plus
+        )
+    }
+}
+
+/**
+ * Hilfsfunktion: Finde Position auf dem Pfad bei gegebener Distanz
+ */
+private fun findPositionOnPath(
+    circlePoints: List<Offset>,
+    segmentLengths: List<Float>,
+    totalLength: Float,
+    targetDist: Float
+): Offset? {
+    if (circlePoints.size < 2) return null
+    
+    // Wrap around wenn Distanz negativ oder zu groß
+    val wrappedDist = ((targetDist % totalLength) + totalLength) % totalLength
+    
+    var accumulatedLength = 0f
+    
+    for (s in 0 until segmentLengths.size) {
+        val segLen = segmentLengths[s]
+        
+        if (wrappedDist <= accumulatedLength + segLen) {
+            // Position in diesem Segment
+            val localT = (wrappedDist - accumulatedLength) / segLen
+            return Offset(
+                x = circlePoints[s].x + (circlePoints[s + 1].x - circlePoints[s].x) * localT,
+                y = circlePoints[s].y + (circlePoints[s + 1].y - circlePoints[s].y) * localT
+            )
+        }
+        
+        accumulatedLength += segLen
+    }
+    
+    return circlePoints.lastOrNull()
+}
+
+/**
+ * Erstelle Fitness Linestrips aus LabelMe JSON
+ * 
+ * Linestrips = Linien die von den Geräten zur Mitte gehen
+ * Labels 8-12 aus LabelMe JSON
+ */
+private fun createFitnessLinestrips(): List<FitnessLinestrip> {
+    val imageWidth = 1536f
+    val imageHeight = 1024f
+    
+    // Normalisiere Punkt
+    fun normalizePoint(x: Float, y: Float): Offset {
+        return Offset(x / imageWidth, y / imageHeight)
+    }
+    
+    return listOf(
+        // Linestrip 8 - Von links (Bankdrücken) zur Mitte
+        // Points: [[441.68, 387.0], [520.63, 388.32], [564.05, 427.79], [625.89, 440.95]]
+        FitnessLinestrip(
+            id = "8",
+            points = listOf(
+                normalizePoint(441.68f, 387.0f),
+                normalizePoint(520.63f, 388.32f),
+                normalizePoint(564.05f, 427.79f),
+                normalizePoint(625.89f, 440.95f)
+            ),
+            color = Color(0xFF00BFFF) // Cyan (Kreis 2 - Bankdrücken)
+        ),
+        
+        // Linestrip 9 - Von oben (Fahrrad) zur Mitte
+        // Points: [[766.68, 281.74], [766.68, 348.84]]
+        FitnessLinestrip(
+            id = "9",
+            points = listOf(
+                normalizePoint(766.68f, 281.74f),
+                normalizePoint(766.68f, 348.84f)
+            ),
+            color = Color(0xFFFFA500) // Orange (Kreis 1 - Fahrrad)
+        ),
+        
+        // Linestrip 10 - Von rechts (Klimmzüge) zur Mitte
+        // Points: [[1086.42, 388.32], [1007.47, 389.63], [969.32, 427.79], [911.42, 439.63]] - UMGEKEHRT!
+        FitnessLinestrip(
+            id = "10",
+            points = listOf(
+                normalizePoint(1086.42f, 388.32f), // Start: außen rechts
+                normalizePoint(1007.47f, 389.63f),
+                normalizePoint(969.32f, 427.79f),
+                normalizePoint(911.42f, 439.63f)   // Ende: innen (Mitte)
+            ),
+            color = Color(0xFF00FF00) // Grün (Kreis 6 - Klimmzüge)
+        ),
+        
+        // Linestrip 11 - Von rechts unten (Beinpresse) zur Mitte
+        // Points: [[1049.58, 665.95], [995.63, 650.16], [958.79, 605.42], [903.53, 587.0]] - UMGEKEHRT!
+        FitnessLinestrip(
+            id = "11",
+            points = listOf(
+                normalizePoint(1049.58f, 665.95f), // Start: außen rechts
+                normalizePoint(995.63f, 650.16f),
+                normalizePoint(958.79f, 605.42f),
+                normalizePoint(903.53f, 587.0f)    // Ende: innen (Mitte)
+            ),
+            color = Color(0xFFFFD700) // Gold (Kreis 5 - Beinpresse)
+        ),
+        
+        // Linestrip 12 - Von unten (Körper) zur Mitte
+        // Points: [[768.0, 733.05], [768.0, 662.0]]
+        FitnessLinestrip(
+            id = "12",
+            points = listOf(
+                normalizePoint(768.0f, 733.05f),
+                normalizePoint(768.0f, 662.0f)
+            ),
+            color = Color(0xFF00BFFF) // Cyan (Kreis 7 - Körper)
+        ),
+        
+        // Linestrip 20 - Von Yoga (unten links) zur Mitte (NEU!)
+        // Points: [[484.0, 666.0], [538.0, 652.0], [574.0, 607.0], [633.0, 587.0]]
+        FitnessLinestrip(
+            id = "20",
+            points = listOf(
+                normalizePoint(484.0f, 666.0f),
+                normalizePoint(538.0f, 652.0f),
+                normalizePoint(574.0f, 607.0f),
+                normalizePoint(633.0f, 587.0f)
+            ),
+            color = Color(0xFF9370DB) // Lila (Kreis 3 - Yoga)
+        )
+    )
+}
+
+/**
+ * Zeichne Röhre entlang Linestrip mit Blitzen
+ * 
+ * 1. Röhre zeichnen (wie bei den Kreisen)
+ * 2. Blitze durch die Röhre schießen lassen
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawLightningLinestrip(
+    linestrip: FitnessLinestrip,
+    lightningProgress: Float,
+    canvasWidth: Float,
+    canvasHeight: Float
+) {
+    if (linestrip.points.size < 2) return
+    
+    // Konvertiere normalisierte Koordinaten zu Pixel
+    val pixelPoints = linestrip.points.map { Offset(it.x * canvasWidth, it.y * canvasHeight) }
+    
+    // Berechne Länge des Pfades
+    val segmentLengths = mutableListOf<Float>()
+    var totalLength = 0f
+    
+    for (i in 0 until pixelPoints.size - 1) {
+        val dx = pixelPoints[i + 1].x - pixelPoints[i].x
+        val dy = pixelPoints[i + 1].y - pixelPoints[i].y
+        val length = sqrt(dx * dx + dy * dy)
+        segmentLengths.add(length)
+        totalLength += length
+    }
+    
+    if (totalLength <= 0f) return
+    
+    // 1. Zeichne die Röhre (Pfad) - HELLER!
+    val path = Path().apply {
+        moveTo(pixelPoints.first().x, pixelPoints.first().y)
+        for (i in 1 until pixelPoints.size) {
+            lineTo(pixelPoints[i].x, pixelPoints[i].y)
+        }
+    }
+    
+    drawPath(
+        path = path,
+        color = linestrip.color.copy(alpha = 1.0f), // Alpha = 1.0 (volle Helligkeit) - HELLER!
+        style = Stroke(
+            width = 3f,
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round
+        )
+    )
+    
+    // 2. Zeichne Blitze durch die Röhre (3 Blitze von außen nach innen)
+    // WICHTIG: Blitze folgen exakt dem Pfad, nicht als gerade Linie!
+    val blitzCount = 3
+    val blitzLength = 50f // Länge eines Blitzes in Pixeln
+    
+    for (i in 0 until blitzCount) {
+        val offset = i.toFloat() / blitzCount
+        val t = (lightningProgress + offset) % 1f
+        
+        // UMGEKEHRT: Von außen (0) nach innen (totalLength)
+        // Start-Position des Blitzes (Kopf - bewegt sich zur Mitte)
+        val startDist = t * totalLength
+        // End-Position des Blitzes (Schweif - folgt dahinter)
+        val endDist = (startDist + blitzLength).coerceAtMost(totalLength)
+        
+        // Nur zeichnen wenn der Blitz innerhalb des Pfades liegt
+        if (startDist < totalLength) {
+            // Erstelle einen Pfad-Segment für den Blitz (folgt dem Original-Pfad!)
+            val blitzPath = Path()
+            var currentDist = 0f
+            var pathStarted = false
+            
+            for (segmentIndex in 0 until pixelPoints.size - 1) {
+                val segmentStart = pixelPoints[segmentIndex]
+                val segmentEnd = pixelPoints[segmentIndex + 1]
+                val segmentLen = segmentLengths[segmentIndex]
+                val nextDist = currentDist + segmentLen
+                
+                // Prüfe ob dieses Segment Teil des Blitzes ist
+                if (nextDist >= startDist && currentDist <= endDist) {
+                    // Berechne Start- und Endpunkte innerhalb dieses Segments
+                    val segmentStartT = ((startDist - currentDist) / segmentLen).coerceIn(0f, 1f)
+                    val segmentEndT = ((endDist - currentDist) / segmentLen).coerceIn(0f, 1f)
+                    
+                    val segmentStartPoint = Offset(
+                        segmentStart.x + (segmentEnd.x - segmentStart.x) * segmentStartT,
+                        segmentStart.y + (segmentEnd.y - segmentStart.y) * segmentStartT
+                    )
+                    val segmentEndPoint = Offset(
+                        segmentStart.x + (segmentEnd.x - segmentStart.x) * segmentEndT,
+                        segmentStart.y + (segmentEnd.y - segmentStart.y) * segmentEndT
+                    )
+                    
+                    if (!pathStarted) {
+                        blitzPath.moveTo(segmentStartPoint.x, segmentStartPoint.y)
+                        pathStarted = true
+                    }
+                    blitzPath.lineTo(segmentEndPoint.x, segmentEndPoint.y)
+                }
+                
+                currentDist = nextDist
+            }
+            
+            // Zeichne den Blitz-Pfad (folgt exakt dem Original-Pfad!)
+            if (pathStarted) {
+                // Glow-Effekt
+                drawPath(
+                    path = blitzPath,
+                    color = linestrip.color.copy(alpha = 0.5f),
+                    style = Stroke(
+                        width = 5f,
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    ),
+                    blendMode = BlendMode.Plus
+                )
+                
+                // Core-Effekt
+                drawPath(
+                    path = blitzPath,
+                    color = linestrip.color.copy(alpha = 1.0f),
+                    style = Stroke(
+                        width = 2f,
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
+                )
+            }
+        }
+    }
+}

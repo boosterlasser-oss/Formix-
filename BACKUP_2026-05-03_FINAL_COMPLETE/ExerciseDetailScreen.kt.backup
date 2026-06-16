@@ -1,0 +1,114 @@
+package com.fantasyfoodplanner.features.fitness
+
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import com.fantasyfoodplanner.data.AppDb
+import com.fantasyfoodplanner.ui.*
+import kotlinx.coroutines.flow.first
+
+@Composable
+fun ExerciseDetailScreen(
+    exerciseName: String,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val db = remember { AppDb.get(context) }
+    val def = remember(exerciseName) { ExerciseDefinitions.get(exerciseName) }
+    val proInfo = remember(exerciseName) { ExerciseProProvider.get(exerciseName) }
+
+    FantasySurface {
+        Column(Modifier.fillMaxSize()) {
+            MainAppBar(title = exerciseName, onBack = onBack, showAI = true)
+
+            Column(
+                Modifier
+                    .weight(1f)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // TEMPORÄR: Placeholder statt Lottie während Animations-Update
+                // TODO: Nach Update zurück zu: LottieAnimationWindow(exerciseName = exerciseName)
+                PlaceholderAnimationWindow(exerciseName = exerciseName)
+
+                // YouTube-Button (wie original)
+                Spacer(Modifier.height(12.dp))
+                Button(
+                    onClick = {
+                        try {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://www.youtube.com/results?search_query=${exerciseName.replace(" ", "+")}")
+                            )
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.e("ExerciseDetail", "Error opening YouTube", e)
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(horizontal = 16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = FantasyColors.Accent.copy(alpha = 0.2f),
+                        contentColor = FantasyColors.Accent
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, FantasyColors.Accent)
+                ) {
+                    FText("Auf YouTube anschauen", sizeSp = 12, bold = true)
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                proInfo?.let { info ->
+                    FantasyCard(Modifier.fillMaxWidth()) {
+                        FText("ZIELMUSKELN", bold = true, sizeSp = 14, color = FantasyColors.Accent)
+                        Spacer(Modifier.height(8.dp))
+                        FText("Primär: ${info.primaryZones.joinToString(", ") { it.label }}", sizeSp = 14, bold = true)
+                        if (info.secondaryZones.isNotEmpty()) {
+                            FText("Sekundär: ${info.secondaryZones.joinToString(", ") { it.label }}", sizeSp = 13, color = FantasyColors.GrayText)
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+
+                if (proInfo != null) {
+                    InstructionSection("1) STARTPOSITION", proInfo.startPosition)
+                    InstructionSection("2) AUSFÜHRUNG", proInfo.movement.joinToString("\n") { "• $it" })
+                    InstructionSection("3) ATMUNG", proInfo.breathing)
+                    InstructionSection("4) FEHLER", proInfo.commonMistakes.joinToString("\n") { "⚠ $it" }, Color.Red.copy(0.7f))
+                    InstructionSection("5) TIPPS", proInfo.coachingTips.joinToString("\n") { "💡 $it" }, FantasyColors.Gold)
+                    InstructionSection("6) VARIANTEN", proInfo.variants)
+                    InstructionSection("7) ABBRUCH", proInfo.whenToStop, Color.Red)
+                } else {
+                    FantasyCard(Modifier.fillMaxWidth()) {
+                        FText("ANLEITUNG", bold = true, sizeSp = 18, color = FantasyColors.Accent)
+                        FText(def.desc)
+                    }
+                }
+
+                Spacer(Modifier.height(32.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun InstructionSection(title: String, content: String, titleColor: Color = FantasyColors.Accent) {
+    FantasyCard(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        FText(title, bold = true, sizeSp = 12, color = titleColor)
+        FText(content, sizeSp = 14)
+    }
+}
+

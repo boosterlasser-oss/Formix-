@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HANDWERK FIT</title>
+  <meta name="robots" content="noindex" />
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;display:grid;place-items:center;min-height:100vh;background:#fff;color:#111}
+    .card{max-width:520px;padding:24px 20px;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    h1{font-size:20px;margin:0 0 8px}
+    p{margin:0 0 10px;line-height:1.35;color:rgba(0,0,0,.72)}
+    .small{font-size:13px;color:rgba(0,0,0,.55)}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>HANDWERK FIT lädt…</h1>
+    <p>Wenn du hier hängen bleibst: Seite neu laden.</p>
+    <p class="small">Weiterleitung auf die App…</p>
+  </div>
+<script>
+(function () {
+  var path = window.location.pathname || "/";
+  var search = window.location.search || "";
+  var hash = window.location.hash || "";
+
+  // already inside /app
+  if (path.startsWith("/app/") || path === "/app") {
+    if (path === "/app") window.location.replace("/app/" + search + hash);
+    return;
+  }
+
+  // Map deep links like /exercise.html -> /app/exercise.html
+  var candidate = "/app" + (path === "/" ? "/" : path);
+
+  // Try HEAD to see if the mapped file exists
+  try {
+    fetch(candidate, { method: "HEAD", cache: "no-store" })
+      .then(function (r) {
+        if (r && r.ok) {
+          window.location.replace(candidate + search + hash);
+        } else {
+          window.location.replace("/app/" + search + hash);
+        }
+      })
+      .catch(function () {
+        window.location.replace("/app/" + search + hash);
+      });
+  } catch (e) {
+    window.location.replace("/app/" + search + hash);
+  }
+})();
+</script>
+</body>
+</html>

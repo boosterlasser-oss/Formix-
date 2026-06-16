@@ -1,0 +1,168 @@
+package com.fantasyfoodplanner.features.fitness
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.*
+import com.fantasyfoodplanner.R
+import com.fantasyfoodplanner.ui.FantasyColors
+import com.fantasyfoodplanner.ui.FText
+
+/**
+ * Schwarzes Animationsfenster mit lokalen Lottie JSON-Animationen
+ *
+ * - Lädt JSON aus assets
+ * - Loop-Funktion
+ * - Lifecycle-sicher
+ * - LottieComposition caching
+ * - Fallback bei fehlender Animation
+ */
+@Composable
+fun LottieAnimationWindow(
+    exerciseName: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val animationPath = remember(exerciseName) {
+        LottieAnimationProvider.initialize(context)
+        LottieAnimationProvider.getAnimationPath(exerciseName, context)
+    }
+
+    var isLoading by remember(animationPath) { mutableStateOf(animationPath != null) }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color(0xFF0F0F0F))
+            .border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(24.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (animationPath != null) {
+            // Lade Lottie Animation
+            LottieAnimationContent(
+                animationPath = animationPath,
+                onLoadingStateChanged = { isLoading = it }
+            )
+        } else {
+            // Fallback: Animation nicht verfügbar
+            AnimationFallback()
+        }
+
+        // Loading Indicator
+        if (isLoading && animationPath != null) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(48.dp),
+                color = FantasyColors.Accent
+            )
+        }
+    }
+}
+
+/**
+ * Interne Komponente für Lottie Animation
+ * WICHTIG: Animation läuft IMMER in endloses Loop!
+ */
+@Composable
+private fun LottieAnimationContent(
+    animationPath: String,
+    onLoadingStateChanged: (Boolean) -> Unit
+) {
+    val composition by rememberLottieComposition(
+        spec = LottieCompositionSpec.Asset(animationPath)
+    )
+
+    // Loading-State nur für Spinner
+    LaunchedEffect(composition) {
+        onLoadingStateChanged(composition == null)
+    }
+
+    // Animation IMMER spielen - endlos loopen!
+    LottieAnimation(
+        composition = composition,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        isPlaying = true,  // IMMER true - nie stoppen!
+        iterations = LottieConstants.IterateForever,  // ENDLOS loopen!
+        speed = 1f,
+        restartOnPlay = false,
+        reverseOnRepeat = false,
+        clipToCompositionBounds = true
+    )
+}
+
+/**
+ * Fallback-Komponente wenn keine Animation vorhanden
+ */
+@Composable
+private fun AnimationFallback() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        FText(
+            "Animation wird vorbereitet",
+            sizeSp = 14,
+            color = Color.White.copy(0.6f),
+            bold = true,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(12.dp))
+        FText(
+            "JSON-Animationen für diese Übung werden noch hinzugefügt",
+            sizeSp = 11,
+            color = Color.White.copy(0.4f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+/**
+ * TEMPORÄRER PLACEHOLDER für Übungs-Animationen während Animations-Update
+ *
+ * Zeigt anatomisches Muskel-Bild als Platzhalter bis alle Animationen verfügbar sind.
+ *
+ * TODO: Nach Animations-Update wieder auf LottieAnimationWindow wechseln!
+ */
+@Composable
+fun PlaceholderAnimationWindow(
+    exerciseName: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color(0xFF0F0F0F))
+            .border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(24.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.exercise_placeholder),
+            contentDescription = "Übungs-Placeholder",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+
+

@@ -1,0 +1,21 @@
+# --- Android / Gradle ---
+.gradle/
+build/
+app/build/
+local.properties
+
+# --- IDE ---
+.idea/
+*.iml
+
+# --- Keystore (NIEMALS in Git!) ---
+*.jks
+*.keystore
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Python / Tools ---
+__pycache__/
+*.pyc

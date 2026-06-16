@@ -1,0 +1,41 @@
+﻿HANDBUCH: Fantasy Nutrition Planner
+
+Willkommen, tapferer Held!
+
+Dieses Handbuch ist deine Karte und dein Kompass für die Welt des Fantasy Nutrition Planners. Die App ist dein magischer Begleiter, der dir hilft, deine Ernährungs- und Fitness-Quests zu meistern und zum legendären Helden aufzusteigen!
+
+---
+1. Die Heldenschmiede: Dein Profil
+
+Alles beginnt mit dir!
+- Gehe zum Profil.
+- Gib hier deine Daten ein (Alter, Gewicht, Größe etc.).
+- Lege dein großes Ziel fest. Die App nutzt diese Informationen für deine Quests und Kalorienziele.
+
+---
+2. Das Trainingslager: Fitness-Quests & PRO-TIMER
+
+Hier stählst du deinen Körper!
+- Gehe zu "Fitness" oder "CrossFit".
+- Die App gibt dir einen Plan vor (deine "Quest").
+- **PRO-TIMER:** Bei Zeit-Übungen oder Aufwärmübungen findest du den neuen sportlichen Zeitbutton.
+  - **Start:** Ein Klick startet den Countdown.
+  - **Hintergrund:** Der Timer läuft stabil weiter, auch wenn du die App schließt oder das Handy sperrst (siehe Benachrichtigung).
+  - **Alarm:** Wenn die Zeit um ist, ertönt ein lauter Alarm in Dauerschleife.
+  - **Stop:** Klicke auf den roten Button (STOP) im Training, um den Alarm zu beenden.
+
+---
+3. Die Halle der Legenden: Die Helden-Statistik
+
+Hier siehst du, wie du dich vom Knappen zum strahlenden Helden entwickelst.
+- **Zacken-Diagramm:** Dein Fortschritt über die Zeit. Wische über die Zacken, um Details zu sehen.
+- **Erfolg-Rate (%):** Deine Disziplin-Anzeige! Steigt nur, wenn du deine Sätze im Training abhakst.
+
+---
+4. Das Hauptquartier: Smart Session Adjustment
+
+Dein AI Coach fragt dich vor jedem Training, wie du dich fühlst.
+- Antworte ehrlich (z.B. "Muskelkater" oder "Wenig Zeit").
+- Die KI passt die Übungen, Sätze und Gewichte sofort an deinen Zustand an.
+
+Viel Erfolg auf deiner Reise, Held! 🛡️🚀

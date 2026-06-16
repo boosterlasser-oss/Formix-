@@ -1,0 +1,359 @@
+package com.fantasyfoodplanner.features.fitness
+
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+
+/**
+ * Fitness Flow Animation - Röhren mit fließenden Partikeln
+ * 
+ * Basiert auf Energy Hub 3D App Konzept (energy_flow_overlay_v2.dart):
+ * - Exakte Kreise aus LabelMe JSON
+ * - Farben aus dem Original-Bild
+ * - Partikel fließen durch die Röhre (Glow + Core)
+ * - Smooth kontinuierlicher Fluss
+ */
+
+/**
+ * Daten-Modell für einen Fitness-Kreis aus LabelMe
+ */
+data class FitnessCircle(
+    val id: String,
+    val label: String,
+    val centerX: Float,  // Normalisiert 0.0 - 1.0
+    val centerY: Float,  // Normalisiert 0.0 - 1.0
+    val radius: Float,   // Normalisiert 0.0 - 1.0
+    val color: Color     // Farbe aus dem Bild
+)
+
+/**
+ * MAIN COMPOSABLE - Fitness Flow Animation
+ * 
+ * Zeigt Röhren mit fließenden Partikeln an allen 7 Kreisen
+ */
+@Composable
+fun FitnessFlowAnimation(
+    modifier: Modifier = Modifier
+) {
+    // Kontinuierliche Flow-Animation (3.5 Sekunden wie im Energy Hub)
+    val infiniteTransition = rememberInfiniteTransition(label = "fitness_flow")
+    val flowProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3500, // 3.5 Sekunden
+                easing = LinearEasing   // Linear für smooth flow
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "flow"
+    )
+
+    // Kreise definieren
+    val circles = remember { createFitnessCircles() }
+
+    // Canvas zeichnen
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val canvasWidth = size.width
+        val canvasHeight = size.height
+
+        // Zeichne alle Röhren mit Partikeln
+        circles.forEach { circle ->
+            drawCircularTube(
+                circle = circle,
+                flowProgress = flowProgress,
+                canvasWidth = canvasWidth,
+                canvasHeight = canvasHeight
+            )
+        }
+    }
+}
+
+/**
+ * Erstelle Fitness Circles aus LabelMe JSON
+ * 
+ * Bild: 1536x1024 px
+ * 
+ * LabelMe circle format: 2 Punkte [x1,y1], [x2,y2] definieren Bounding Box
+ * - Center: ((x1+x2)/2, (y1+y2)/2)
+ * - Radius: sqrt((x2-x1)² + (y2-y1)²) / 2
+ * 
+ * Farben aus dem Original-Bild:
+ * - Kreis 1 (Fahrrad oben): Orange
+ * - Kreis 2 (Bankdrücken links): Cyan
+ * - Kreis 3 (Yoga unten): Cyan/Türkis
+ * - Kreis 4 (Springseil rechts-unten): Orange/Gelb
+ * - Kreis 5 (Beinpresse links-unten): Lila
+ * - Kreis 6 (Klimmzüge rechts): Grün
+ * - Kreis 7 (Körper Mitte): Cyan-Türkis (Hauptfarbe)
+ */
+private fun createFitnessCircles(): List<FitnessCircle> {
+    val imageWidth = 1536f
+    val imageHeight = 1024f
+    
+    // Funktion zum Normalisieren
+    fun normalize(x: Float, y: Float, r: Float): Triple<Float, Float, Float> {
+        return Triple(x / imageWidth, y / imageHeight, r / imageWidth)
+    }
+    
+    // Funktion zum Berechnen von Center + Radius aus 2 Punkten (LabelMe Circle)
+    // LabelMe Format: Punkt 1 = Mittelpunkt, Punkt 2 = Punkt auf dem Kreis
+    // Radius = Abstand zwischen den beiden Punkten
+    fun calcCircle(x1: Float, y1: Float, x2: Float, y2: Float): Triple<Float, Float, Float> {
+        val cx = x1  // Punkt 1 ist der Mittelpunkt!
+        val cy = y1
+        val dx = x2 - x1
+        val dy = y2 - y1
+        val r = sqrt(dx * dx + dy * dy)  // Radius = Abstand zwischen den Punkten
+        return Triple(cx, cy, r)
+    }
+    
+    return listOf(
+        // Kreis 1 - Fahrrad (Label "1")
+        // Points: [[769.32, 159.37], [866.68, 227.79]]
+        calcCircle(769.32f, 159.37f, 866.68f, 227.79f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "1",
+                    label = "Fahrrad",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFFFFA500) // Orange
+                )
+            }
+        },
+        
+        // Kreis 2 - Bankdrücken (Label "2")
+        // Points: [[310.11, 365.95], [389.05, 471.21]]
+        calcCircle(310.11f, 365.95f, 389.05f, 471.21f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "2",
+                    label = "Bankdrücken",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00BFFF) // Cyan
+                )
+            }
+        },
+        
+        // Kreis 3 - Yoga (Label "3")
+        // Points: [[368.00, 713.32], [445.63, 810.68]]
+        calcCircle(368.00f, 713.32f, 445.63f, 810.68f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "3",
+                    label = "Yoga",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF9370DB) // Lila (KORRIGIERT)
+                )
+            }
+        },
+        
+        // Kreis 4 - Springseil (Label "4")
+        // Points: [[773.26, 847.53], [858.79, 930.42]]
+        calcCircle(773.26f, 847.53f, 858.79f, 930.42f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "4",
+                    label = "Springseil",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00CED1) // Türkis (KORRIGIERT)
+                )
+            }
+        },
+        
+        // Kreis 5 - Beinpresse (Label "5")
+        // Points: [[1165.37, 715.95], [1236.42, 813.32]]
+        calcCircle(1165.37f, 715.95f, 1236.42f, 813.32f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "5",
+                    label = "Beinpresse",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFFFFD700) // Gold (KORRIGIERT)
+                )
+            }
+        },
+        
+        // Kreis 6 - Klimmzüge (Label "6")
+        // Points: [[1216.68, 367.26], [1270.63, 481.74]]
+        calcCircle(1216.68f, 367.26f, 1270.63f, 481.74f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "6",
+                    label = "Klimmzüge",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00FF00) // Grün
+                )
+            }
+        },
+        
+        // Kreis 7 - Körper (Label "7")
+        // Points: [[769.32, 504.11], [881.16, 625.16]]
+        calcCircle(769.32f, 504.11f, 881.16f, 625.16f).let { (cx, cy, r) ->
+            normalize(cx, cy, r).let { (nx, ny, nr) ->
+                FitnessCircle(
+                    id = "7",
+                    label = "Körper",
+                    centerX = nx,
+                    centerY = ny,
+                    radius = nr,
+                    color = Color(0xFF00BFFF) // Cyan (wie Bankdrücken - KORRIGIERT)
+                )
+            }
+        }
+    )
+}
+
+/**
+ * Zeichne kreisförmige Röhre mit fließenden Partikeln
+ * 
+ * Wie Energy Hub energy_flow_overlay_v2.dart:
+ * 1. Röhre zeichnen (drawPath mit Stroke)
+ * 2. Partikel durch die Röhre fließen lassen (Glow + Core)
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCircularTube(
+    circle: FitnessCircle,
+    flowProgress: Float,
+    canvasWidth: Float,
+    canvasHeight: Float
+) {
+    // Konvertiere normalisierte Koordinaten zu Pixel
+    val centerX = circle.centerX * canvasWidth
+    val centerY = circle.centerY * canvasHeight
+    val radiusPx = circle.radius * canvasWidth
+    
+    // Erstelle Kreis-Pfad (360 Grad, viele Punkte für smooth circle)
+    val circlePoints = mutableListOf<Offset>()
+    val segments = 60 // 60 Segmente für glatten Kreis
+    
+    for (i in 0..segments) {
+        val angle = (i.toFloat() / segments) * 2f * PI.toFloat()
+        val x = centerX + radiusPx * cos(angle)
+        val y = centerY + radiusPx * sin(angle)
+        circlePoints.add(Offset(x, y))
+    }
+    
+    // 1. Zeichne Röhre (die Kreis-Linie selbst)
+    val tubePath = Path().apply {
+        moveTo(circlePoints.first().x, circlePoints.first().y)
+        for (i in 1 until circlePoints.size) {
+            lineTo(circlePoints[i].x, circlePoints[i].y)
+        }
+        close() // Schließe den Kreis
+    }
+    
+    // Röhre zeichnen mit Stroke (wie Energy Hub: strokeWidth = lineWidth)
+    drawPath(
+        path = tubePath,
+        color = circle.color.copy(alpha = 0.85f), // Aktive Opacity wie im Energy Hub
+        style = Stroke(
+            width = 3f, // lineWidth aus Energy Hub
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round
+        )
+    )
+    
+    // 2. Zeichne Partikel durch die Röhre (wie Energy Hub: particles = 3)
+    drawParticlesAlongTube(
+        circlePoints = circlePoints,
+        color = circle.color,
+        flowProgress = flowProgress
+    )
+}
+
+/**
+ * Zeichne animierte Partikel entlang der Röhre
+ * 
+ * Wie Energy Hub energy_flow_overlay_v2.dart _drawParticles():
+ * - 3 Partikel
+ * - Glow mit Blur (maskFilter)
+ * - Core (intensiv)
+ */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawParticlesAlongTube(
+    circlePoints: List<Offset>,
+    color: Color,
+    flowProgress: Float
+) {
+    if (circlePoints.size < 2) return
+    
+    // Berechne Segment-Längen (wie im Energy Hub)
+    val segmentLengths = mutableListOf<Float>()
+    var totalLength = 0f
+    
+    for (i in 0 until circlePoints.size - 1) {
+        val dx = circlePoints[i + 1].x - circlePoints[i].x
+        val dy = circlePoints[i + 1].y - circlePoints[i].y
+        val length = sqrt(dx * dx + dy * dy)
+        segmentLengths.add(length)
+        totalLength += length
+    }
+    
+    if (totalLength <= 0f) return
+    
+    // 3 Partikel wie im Energy Hub
+    val particleCount = 3
+    
+    for (i in 0 until particleCount) {
+        val offset = i.toFloat() / particleCount
+        val t = (flowProgress + offset) % 1f
+        
+        // Position auf Pfad berechnen (wie im Energy Hub)
+        val targetDist = t * totalLength
+        var accumulatedLength = 0f
+        
+        for (s in 0 until segmentLengths.size) {
+            val segLen = segmentLengths[s]
+            
+            if (targetDist <= accumulatedLength + segLen) {
+                // Position in diesem Segment
+                val localT = (targetDist - accumulatedLength) / segLen
+                val pos = Offset(
+                    x = circlePoints[s].x + (circlePoints[s + 1].x - circlePoints[s].x) * localT,
+                    y = circlePoints[s].y + (circlePoints[s + 1].y - circlePoints[s].y) * localT
+                )
+                
+                // Zeichne Partikel (Glow + Core wie Energy Hub)
+                // Glow (mit Blur)
+                drawCircle(
+                    color = color.copy(alpha = 0.25f),
+                    radius = 5.5f, // size + 1.5 wie im Energy Hub (size=4)
+                    center = pos,
+                    blendMode = BlendMode.Plus
+                )
+                
+                // Core
+                drawCircle(
+                    color = color.copy(alpha = 1.0f),
+                    radius = 4f, // size aus Energy Hub
+                    center = pos
+                )
+                
+                break
+            }
+            
+            accumulatedLength += segLen
+        }
+    }
+}

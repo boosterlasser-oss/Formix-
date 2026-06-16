@@ -1,0 +1,234 @@
+{
+  "rules": [
+    {
+      "match": "(crunch|sit-?up|bauchcrunch|ab crunch)",
+      "type": "core",
+      "anim": "crunch",
+      "desc": "Crunch: Rippen Richtung Becken ziehen, kontrolliert aufrollen, Nacken lang.",
+      "cues": [
+        "Ausatmen beim Hochrollen",
+        "Nicht am Nacken ziehen",
+        "Spannung halten, langsam abrollen"
+      ]
+    },
+    {
+      "match": "(dips|bankdips|barrenstütz)",
+      "type": "push",
+      "anim": "dips",
+      "desc": "Dips: Kontrolliert absenken und hochdrücken, Schultern unten halten.",
+      "cues": [
+        "Schultern weg von den Ohren",
+        "Ellbogen kontrolliert, nicht ausflaren",
+        "Schmerzfrei arbeiten"
+      ]
+    },
+    {
+      "match": "(kabelrudern|seated row|maschinenrudern)",
+      "type": "pull",
+      "anim": "row",
+      "desc": "Kabel-/Maschinenrudern: Zieh zum Bauch, Schulterblätter aktiv nach hinten/unten, kontrolliert zurück.",
+      "cues": [
+        "Brust hoch, Rücken neutral",
+        "Ellbogen nah am Körper",
+        "Endposition kurz halten"
+      ]
+    },
+    {
+      "match": "(trizeps|pushdown|triceps pushdown|kabel.*trizeps|seil.*trizeps)",
+      "type": "push",
+      "anim": "triceps",
+      "desc": "Trizepsdrücken am Kabel: Ellbogen fix, nach unten strecken, kontrolliert zurück.",
+      "cues": [
+        "Ellbogen am Körper fest",
+        "Unten strecken ohne Schultern hochzuziehen",
+        "Langsam zurück bis ~90°"
+      ]
+    },
+    {
+      "match": "(bizeps|curl|curls|hammercurl|hammer curl)",
+      "type": "pull",
+      "anim": "curl",
+      "desc": "Bizepscurls: Oberarme ruhig am Körper, kontrolliert hochcurlen und langsam ablassen.",
+      "cues": [
+        "Ellbogen bleiben neben dem Körper",
+        "Keine Hüft-/Rücken-Schwünge",
+        "Oben kurz anspannen, unten Spannung halten"
+      ]
+    },
+    {
+      "match": "(kreuzheben|deadlift|rum(än|ae)nisches|romanian deadlift|rdl|hip hinge)",
+      "type": "legs",
+      "anim": "hinge",
+      "desc": "Hip-Hinge/Kreuzheben: Hüfte nach hinten schieben, Rücken neutral, Gewicht nah am Körper führen.",
+      "cues": [
+        "Spannung im Rumpf, Schulterblätter unten",
+        "Bewegung aus der Hüfte – Knie nur leicht beugen",
+        "Langsam ablassen, über Fersen/Mittelfuß aufrichten"
+      ]
+    },
+    {
+      "match": "(beinpresse|leg press)",
+      "type": "legs",
+      "anim": "legpress",
+      "desc": "Beinpresse: Füße stabil auf die Plattform, kontrolliert beugen und kraftvoll strecken ohne Knie zu blockieren.",
+      "cues": [
+        "Becken/Rücken an der Lehne lassen",
+        "Knie folgen den Zehen, nicht nach innen",
+        "Unten kurz stoppen, dann gleichmäßig hochdrücken"
+      ]
+    },
+    {
+      "match": "(kniebeuge|squat|goblet squat|smith squat)",
+      "type": "legs",
+      "anim": "squat",
+      "desc": "Kniebeugen: Hüfte nach hinten/unten, Knie folgen den Zehen, Rücken bleibt neutral.",
+      "cues": [
+        "Füße schulterbreit, Druck über ganze Fußsohle",
+        "Knie nach außen führen (nicht einknicken)",
+        "Tief nur so weit, wie du stabil bleibst – dann sauber hoch"
+      ]
+    },
+    {
+      "match": "(schulterdr(ück|ueck)en|overhead press|military press|arnold press)",
+      "type": "push",
+      "anim": "overheadpress",
+      "desc": "Schulterdrücken: Gewicht über Kopf drücken, Rippen unten halten, kontrolliert wieder absenken.",
+      "cues": [
+        "Po & Bauch anspannen (kein Hohlkreuz)",
+        "Ellenbogen leicht vor dem Körper, Handgelenke gerade",
+        "Oben Kopf „durch die Arme“, dann langsam zurück"
+      ]
+    },
+    {
+      "match": "(klimmz(ug|üge|uege).*(assist|maschine)|assist(iert|ed).*(pull|klimm))",
+      "type": "pull",
+      "anim": "pullup",
+      "desc": "Assistierte Klimmzüge (Maschine/Band): Gleiche Technik wie beim normalen Klimmzug, nur mit Unterstützung.",
+      "cues": [
+        "Unterstützung so wählen, dass 8–12 saubere Wdh. möglich sind",
+        "Zug aus dem Rücken (Ellbogen nach unten/hinten)",
+        "Kontrolliert ablassen – keine „Fallenlassen“-Wdh."
+      ]
+    },
+    {
+      "match": "(klimmz(ug|üge|uege)|pull-?up|chin-?up|dead\\s*hang)",
+      "type": "pull",
+      "anim": "pullup",
+      "desc": "Klimmzüge: Starte aus dem stabilen Hang, zieh Brust Richtung Stange und senke kontrolliert ab.",
+      "cues": [
+        "Schulter zuerst aktivieren (Schultern runter, Brust hoch)",
+        "Rumpf fest, kein Kippen/Schwung",
+        "Oben kurz halten, dann langsam ablassen"
+      ]
+    },
+    {
+      "match": "(liegestütze|push[- ]?up)",
+      "type": "push",
+      "anim": "pushup",
+      "desc": "Liegestütze: Körper wie ein Brett, kontrolliert absenken und kraftvoll hochdrücken.",
+      "cues": [
+        "Hände unter Schulter",
+        "Rumpf fest (kein Hohlkreuz)",
+        "Brust Richtung Boden, Ellbogen ca. 30–45°"
+      ]
+    },
+    {
+      "match": "(bankdrücken|kurzhantel-?bank|schrägbank|floor press)",
+      "type": "push",
+      "anim": "benchpress",
+      "desc": "Bankdrücken: Hantel kontrolliert zur Brust, dann sauber hochdrücken.",
+      "cues": [
+        "Schulterblätter nach hinten/unten",
+        "Füße fest am Boden",
+        "Stange senkrecht hoch/runter"
+      ]
+    },
+    {
+      "match": "(butterfly|fliegende|pec-?deck|fly)",
+      "type": "push",
+      "anim": "fly",
+      "desc": "Butterfly/Flys: Arme leicht gebeugt, kontrolliert öffnen und zusammenführen.",
+      "cues": [
+        "Nicht überstrecken",
+        "Spannung auf der Brust halten",
+        "Langsam, ohne Schwung"
+      ]
+    },
+    {
+      "match": "(rudern|row|türrudern)",
+      "type": "pull",
+      "anim": "row",
+      "desc": "Rudern: Zug zum Bauch/untere Brust, Schulterblätter aktiv nach hinten ziehen.",
+      "cues": [
+        "Brust raus, Rücken neutral",
+        "Ellbogen nah am Körper",
+        "Am Ende kurz halten"
+      ]
+    },
+    {
+      "match": "(latzug|band-?latzug|bandzug von oben|maschinen-?latzug|lats)",
+      "type": "pull",
+      "anim": "latpulldown",
+      "desc": "Latzug: Stange zur oberen Brust ziehen, kontrolliert wieder hochlassen.",
+      "cues": [
+        "Brust hoch, nicht nach hinten reißen",
+        "Schultern unten lassen",
+        "Kein Schwung"
+      ]
+    },
+    {
+      "match": "(klimmzug|pull-?up|dead hang)",
+      "type": "pull",
+      "anim": "pullup",
+      "desc": "Klimmzug: Aus dem Hang hochziehen bis Kinn über die Stange, dann kontrolliert ablassen.",
+      "cues": [
+        "Rumpf fest",
+        "Schulter zuerst aktivieren",
+        "Saubere Wiederholungen vor Gewicht"
+      ]
+    },
+    {
+      "match": "(face pull)",
+      "type": "pull",
+      "anim": "facepull",
+      "desc": "Face Pull: Band/Seil Richtung Gesicht ziehen, Ellbogen hoch, Schulterblattkontrolle.",
+      "cues": [
+        "Ellbogen hoch führen",
+        "Endposition: Hände neben Gesicht",
+        "Leicht, sauber, Schulterfreundlich"
+      ]
+    },
+    {
+      "match": "(plank)",
+      "type": "core",
+      "anim": "plank",
+      "desc": "Plank: Unterarme am Boden, Körperlinie gerade, Spannung im Bauch/Po.",
+      "cues": [
+        "Bauch anspannen",
+        "Po leicht anspannen",
+        "Nacken neutral"
+      ]
+    },
+    {
+      "match": "(seitstütz|side plank)",
+      "type": "core",
+      "anim": "sideplank",
+      "desc": "Seitstütz: Seitlich auf Unterarm, Hüfte hoch, Körperlinie gerade.",
+      "cues": [
+        "Hüfte nicht absinken lassen",
+        "Schulter weg vom Ohr",
+        "Atmen – nicht verkrampfen"
+      ]
+    }
+  ],
+  "default": {
+    "type": "core",
+    "anim": "generic",
+    "desc": "Beispiel-Animation: Achte auf saubere Kontrolle und ruhige Wiederholungen.",
+    "cues": [
+      "Langsam & sauber",
+      "Kein Schwung",
+      "Schmerzfrei trainieren"
+    ]
+  }
+}

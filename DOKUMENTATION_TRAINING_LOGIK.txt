@@ -1,0 +1,39 @@
+### DOKUMENTATION: TRAININGS-LOGIK & ANALYSE-SYSTEM ###
+
+Dieses Dokument beschreibt die mathematischen Muster und Logiken, nach denen das Training im Fantasy Nutrition Planner analysiert und gesteigert wird.
+
+1. KONSISTENZ-ANALYSE (REGELMÄSSIGKEIT)
+Das System wertet die Kontinuität des Nutzers aus, um Motivations-Stats zu berechnen:
+- Streak-Muster: Zählt aufeinanderfolgende Trainingstage. Ein Tag Pause wird toleriert, ab dem zweiten Tag ohne Training bricht die Strähne (Streak) ab.
+- Pause-Phasen: Sobald eine Lücke von 4 oder mehr Tagen zwischen zwei Einheiten entsteht, wird dies als "Pause-Phase" gewertet. Das System zählt, wie oft solche Phasen pro Monat auftreten.
+- Aktivitäts-Fenster: Rollierende Auswertung der Trainingsfrequenz der letzten 7 und 30 Tage.
+
+2. ÜBUNGS-BEWERTUNG (SCORING)
+Nach Abschluss jeder Übung wird ein Leistungs-Score berechnet:
+- Kraftübungen (Weighted): Score = Gewicht in kg.
+- Eigengewicht (Bodyweight): Score = Schwierigkeitsgrad der Übungsvariante.
+- Zeitbasierte Übungen (Time): Score = Summe der gehaltenen Sekunden über alle Sätze.
+- Erfolgs-Definition: Eine Übung gilt nur als "Erfolgreich", wenn JEDER geplante Satz mit "Daumen hoch" (setSuccess = true) markiert wurde.
+
+3. PLATEAU-ERKENNUNG (STRUKTURELLES LIMIT)
+Das System sucht in der Historie jeder Übung nach drei spezifischen Mustern, um eine Überlastung zu verhindern:
+- Muster A (3-Fail-Regel): Die Übung wurde 3-mal hintereinander nicht erfolgreich abgeschlossen.
+- Muster B (Erfolgsquote): Die Erfolgsrate über die letzten 10 Versuche liegt unter 65 %.
+- Muster C (Stagnation): Über 5 Sessions hinweg konnte keine Steigerung erzielt werden (Gewicht/Sätze/Zeit blieben gleich), obwohl das Ziel nicht erreicht wurde.
+-> Sobald ein Muster zutrifft, wird ein "Strukturelles Limit" markiert und die automatische Steigerung pausiert.
+
+4. AUTOMATISCHE PROGRESSION (DIE NÄCHSTE EINHEIT)
+Basierend auf der Analyse schlägt das System für das nächste Training folgende Werte vor:
+
+SZENARIO: ERFOLG & KEIN LIMIT
+- Krafttraining: Aktuelles Gewicht + 2,5 kg.
+- Bodyweight: Erhöhung der Sätze (bis max. 5), danach Erhöhung des Schwierigkeitsgrades.
+- Zeitübungen: Zielzeit + 30 Sekunden.
+
+SZENARIO: FEHLSCHLAG ODER LIMIT ERKANNT
+- Die Werte werden eingefroren (Plateau-Management).
+- Das System schlägt das gleiche Level erneut vor, bis die Erfolgsquote wieder steigt.
+- Es erfolgt keine erzwungene Steigerung, um Verletzungen und Frustration vorzubeugen.
+
+###########################################################
+Stand: Aktuelle Implementierung (ExerciseLogic & TrainingCalculator)

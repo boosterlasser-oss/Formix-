@@ -1,0 +1,10 @@
+.temp
+build-tools
+emulator
+extras
+fonts
+licenses
+platform-tools
+platforms
+sources
+system-images

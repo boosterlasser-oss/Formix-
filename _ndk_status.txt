@@ -1,0 +1,4 @@
+check started
+source.properties exists: True
+items: 20
+D:\Android\SDK\ndk\26.1.10909125\CHANGELOG.md`nD:\Android\SDK\ndk\26.1.10909125\ndk-gdb.cmd`nD:\Android\SDK\ndk\26.1.10909125\wrap.sh`nD:\Android\SDK\ndk\26.1.10909125\prebuilt`nD:\Android\SDK\ndk\26.1.10909125\ndk-which.cmd`nD:\Android\SDK\ndk\26.1.10909125\build`nD:\Android\SDK\ndk\26.1.10909125\NOTICE`nD:\Android\SDK\ndk\26.1.10909125\NOTICE.toolchain`nD:\Android\SDK\ndk\26.1.10909125\meta`nD:\Android\SDK\ndk\26.1.10909125\ndk-stack.cmd`nD:\Android\SDK\ndk\26.1.10909125\python-packages`nD:\Android\SDK\ndk\26.1.10909125\source.properties`nD:\Android\SDK\ndk\26.1.10909125\ndk-lldb.cmd`nD:\Android\SDK\ndk\26.1.10909125\sources`nD:\Android\SDK\ndk\26.1.10909125\simpleperf`nD:\Android\SDK\ndk\26.1.10909125\README.md`nD:\Android\SDK\ndk\26.1.10909125\toolchains`nD:\Android\SDK\ndk\26.1.10909125\ndk-build.cmd`nD:\Android\SDK\ndk\26.1.10909125\shader-tools`nD:\Android\SDK\ndk\26.1.10909125\package.xml

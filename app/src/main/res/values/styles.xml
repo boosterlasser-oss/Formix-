@@ -1,0 +1,8 @@
+<resources>
+  <style name="Theme.Fantasy.NoMaterial" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+    <item name="android:windowBackground">@color/fantasy_bg</item>
+    <item name="android:statusBarColor">@color/fantasy_surface</item>
+    <item name="android:navigationBarColor">@color/fantasy_surface</item>
+    <item name="android:textColor">@color/fantasy_text</item>
+  </style>
+</resources>
