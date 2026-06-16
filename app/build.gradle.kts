@@ -26,7 +26,7 @@ android {
         applicationId = "com.fantasyfoodplanner"
         minSdk = 26
         targetSdk = 34
-        versionCode = 19
+        versionCode = 20
         versionName = "3.3.0"
         vectorDrawables { useSupportLibrary = true }
 
