@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "668805333425",
+    "project_id": "formix-b1396",
+    "storage_bucket": "formix-b1396.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:668805333425:android:9b3dd343cee12690c47d90",
+        "android_client_info": {
+          "package_name": "com.fantasyfoodplanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1qheJIu6L2TF_f_jLWivmDJquEck89fg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

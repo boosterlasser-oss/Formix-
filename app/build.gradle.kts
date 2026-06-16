@@ -4,6 +4,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 // Keystore-Konfiguration aus local.properties (nie im Quellcode!)
@@ -21,7 +23,7 @@ android {
     compileSdk = 34
     // ndkVersion = "26.1.10909125"  // Deaktiviert - Native C++ Build ausgeblendet
     defaultConfig {
-        applicationId = "com.fantasyfoodplanner.fix.v4"
+        applicationId = "com.fantasyfoodplanner"
         minSdk = 26
         targetSdk = 34
         versionCode = 19
@@ -58,7 +60,6 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
         debug {
-            applicationIdSuffix = ".debug"
         }
     }
     buildFeatures {
@@ -128,6 +129,10 @@ dependencies {
 
     // Google Play Billing
     implementation("com.android.billingclient:billing-ktx:6.2.0")
+
+    // Firebase Crashlytics
+    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     // Encrypted SharedPreferences (API-Key Sicherheit)
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
